@@ -4,14 +4,17 @@ import numpy as np
 
 from rail.utils import catalog_utils
 
-def build_cat_pdf_app(app_name, wrapper):
+
+APP_NAME = 'PZ Pdf Explorer'
+
+def build_cat_pdf_app(wrapper):
 
     var_names = list(catalog_utils.get_active_tag().band_name_dict().values())
 
     assert wrapper.n_obj == 1
     
     # Initialize the Dash app
-    app = Dash(__name__)
+    app = Dash(APP_NAME)
 
     slider_div_list = []
 
@@ -19,8 +22,8 @@ def build_cat_pdf_app(app_name, wrapper):
         slider_div_list.append(
             html.Div([
                 html.Label(f'{name_}:'),
-                dcc.Slider(id=name_, min=20, max=25, step=0.1, value=22.0, 
-                        marks={i: str(i) for i in range(20, 26)},
+                dcc.Slider(id=name_, min=22, max=25, step=0.02, value=24.0, 
+                        marks={i: str(i) for i in range(22, 25)},
                         tooltip={"placement": "bottom", "always_visible": True},
                         updatemode='drag') # Add this line         
             ], style={'margin': '10px'})
@@ -28,7 +31,7 @@ def build_cat_pdf_app(app_name, wrapper):
 
     # Define the layout
     app.layout = html.Div([
-        html.H1("PDF Explorer"),    
+        html.H1(APP_NAME),    
         html.Div(
             slider_div_list, 
             style={'width': '48%', 'display': 'inline-block', 'vertical-align': 'top'}
@@ -48,10 +51,10 @@ def build_cat_pdf_app(app_name, wrapper):
         for name_ in var_names:
             dd[name_] = np.array([kwargs.get(name_)])
             dd[f"{name_}_err"] = np.array([0.01])
+
         data = wrapper(dd)
     
         xvals = np.linspace(0., 3., 301)
-
         yvals = np.squeeze(data.pdf(xvals))
     
         fig = go.Figure()
