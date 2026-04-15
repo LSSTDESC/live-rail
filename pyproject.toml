@@ -23,11 +23,13 @@ dynamic = ["version"]
 dependencies = [
     "pz-rail-base>=2.0",
     "matplotlib",
-    "yamllint",
-    "pyarrow",
-    "jinja2",
-    "tables_io[full]",
+    "plotly",
+    "dash",
+    "jupyter",
+    "jupyter-dash",
+    "qp-prob[full]",
 ]
+
 # On a mac, install optional dependencies with `pip install '.[dev]'` (include the single quotes)
 [project.optional-dependencies]
 
