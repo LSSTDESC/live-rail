@@ -1,4 +1,3 @@
-
 import asyncio
 import dash
 from dash import dcc, html, Input, Output, State, callback
@@ -28,117 +27,252 @@ class AstronomicalDataVisualizer:
         self.catalog = catalog_wrapper
         self.app = dash.Dash(__name__)
         self.current_object_idx = 0
+        self.n_objects = self.catalog.get_nobjects()
         self.setup_layout()
         self.setup_callbacks()
     
     def setup_layout(self):
         """Create the 4-pane layout for the dashboard."""
         self.app.layout = html.Div([
-            html.H1("Redshift explorer", 
-                   style={'textAlign': 'center', 'marginBottom': 30}),
-            
-            # Main container with grid layout
-            html.Div([
-                # Pane 1: Object Selection (top)
-                html.Div([
-                    html.H3("Object Selection"),
-                    self._create_selection_pane()
-                ],  style={
-                    'width': '100%',
-                    'height': '10vh',
-                    'padding': '10px',
-                    'boxSizing': 'border-box'
-                }),
+                html.H1("Redshift Explorer", 
+                       style={
+                               'textAlign': 'center', 
+                               'margin': '0',
+                               'padding': '20px 0',
+                               'backgroundColor': '#f5f5f5',
+                               'borderBottom': '2px solid #ddd'
+                       }),
                 
+                # Main container with flex layout
                 html.Div([
-
-                    # Pane 2: Spectrum (left mid)
-                    html.Div([
-                        html.H3("Photometric Spectrum"),
-                        dcc.Graph(id='spectrum-plot')
-                    ], style={
-                        'width': '50%',
-                        'height': '30vh',
-                        'border': '2px solid #f57c00',
-                        'padding': '10px',
-                        'boxSizing': 'border-box',
-                        'display': 'inline-block',
-                        'verticalAlign': 'top'
-                    }),
-                    
-                    # Pane 3: Color-Color Diagram (right mid)
-                    html.Div([
-                        html.H3("Color-Color Relations"),
-                        self._create_color_controls(),
-                        dcc.Graph(id='color-color-plot')
-                    ], style={
-                        'width': '50%',
-                        'height': '30vh',
-                        'border': '2px solid #7b1fa2',
-                        'padding': '10px',
-                        'boxSizing': 'border-box',
-                        'display': 'inline-block',
-                        'verticalAlign': 'top'
-                    }),
-
-                ],  style={}),  # Remove whitespace between inline-block elements
-                
-                # Pane 4: Redshift Estimates (bottom)
-                html.Div([
-                    html.H3("Redshift Estimates"),
-                    self._create_redshift_controls(),
-                    dcc.Graph(id='redshift-plot')
+                        # Pane 1: Object Selection (top)
+                        html.Div([
+                                html.H3("Object Selection", style={'margin': '0 0 15px 0'}),
+                                html.Div([
+                                        # Back button
+                                        html.Button(
+                                                '← Back',
+                                                id='back-button',
+                                                n_clicks=0,
+                                                disabled=True,  # Initially disabled
+                                                style={
+                                                        'padding': '10px 20px',
+                                                        'fontSize': '14px',
+                                                        'cursor': 'pointer',
+                                                        'backgroundColor': '#2196F3',
+                                                        'color': 'white',
+                                                        'border': 'none',
+                                                        'borderRadius': '4px',
+                                                        'marginRight': '15px',
+                                                        'minWidth': '100px'
+                                                }
+                                        ),
+                                        # Selection controls container
+                                        html.Div([
+                                                html.Div([
+                                                        html.Label(
+                                                                "Select Object:",
+                                                                style={
+                                                                        'fontWeight': 'bold',
+                                                                        'marginBottom': '8px',
+                                                                        'display': 'block',
+                                                                        'fontSize': '14px'
+                                                                }
+                                                        ),
+                                                        html.Div([
+                                                                dcc.Slider(
+                                                                        id='object-slider',
+                                                                        min=0,
+                                                                        max=self.n_objects - 1,
+                                                                        value=0,
+                                                                        marks={i: str(i) for i in range(0, self.n_objects, max(1, self.n_objects // 10))},
+                                                                        step=1,
+                                                                        tooltip={"placement": "bottom", "always_visible": True},
+                                                                        updatemode='drag'
+                                                                ),
+                                                        ], style={'marginBottom': '10px'}),
+                                                        html.Div([
+                                                                html.Span("Object ", style={'fontSize': '14px'}),
+                                                                html.Span(
+                                                                        id='object-counter',
+                                                                        children=f"1 of {self.n_objects}",
+                                                                        style={
+                                                                                'fontWeight': 'bold',
+                                                                                'fontSize': '14px',
+                                                                                'color': '#2196F3'
+                                                                        }
+                                                                )
+                                                        ], style={'textAlign': 'center'})
+                                                ], style={'width': '100%'})
+                                        ], style={
+                                                'flex': '1',
+                                                'display': 'flex',
+                                                'alignItems': 'center',
+                                                'justifyContent': 'center',
+                                                'minWidth': '300px',
+                                                'maxWidth': '600px'
+                                        }),
+                                        # Next button
+                                        html.Button(
+                                                'Next →',
+                                                id='next-button',
+                                                n_clicks=0,
+                                                style={
+                                                        'padding': '10px 20px',
+                                                        'fontSize': '14px',
+                                                        'cursor': 'pointer',
+                                                        'backgroundColor': '#2196F3',
+                                                        'color': 'white',
+                                                        'border': 'none',
+                                                        'borderRadius': '4px',
+                                                        'marginLeft': '15px',
+                                                        'minWidth': '100px'
+                                                }
+                                        )
+                                ], style={
+                                        'display': 'flex',
+                                        'alignItems': 'center',
+                                        'justifyContent': 'center',
+                                        'gap': '10px',
+                                        'width': '100%'
+                                })
+                        ], style={
+                                'padding': '20px',
+                                'backgroundColor': '#fafafa',
+                                'borderBottom': '1px solid #ddd'
+                        }),
+                        
+                        # Middle row: Spectrum and Color-Color side by side
+                        html.Div([
+                                # Pane 2: Spectrum (left)
+                                html.Div([
+                                        html.H3("Photometric Spectrum", style={'margin': '0 0 10px 0'}),
+                                        dcc.Graph(
+                                                id='spectrum-plot',
+                                                style={'height': '100%'},
+                                                config={'responsive': True}
+                                        )
+                                ], style={
+                                        'flex': '1',
+                                        'minWidth': '400px',
+                                        'border': '2px solid #f57c00',
+                                        'padding': '15px',
+                                        'boxSizing': 'border-box',
+                                        'display': 'flex',
+                                        'flexDirection': 'column'
+                                }),
+                                
+                                # Pane 3: Color-Color Diagram (right)
+                                html.Div([
+                                        html.H3("Color-Color Relations", style={'margin': '0 0 10px 0'}),
+                                        html.Div([
+                                                # Controls on the left (20%)
+                                                html.Div([
+                                                        self._create_color_controls()
+                                                ], style={
+                                                        'width': '20%',
+                                                        'minWidth': '150px',
+                                                        'paddingRight': '10px',
+                                                        'boxSizing': 'border-box',
+                                                        'overflowY': 'auto'
+                                                }),
+                                                # Plot on the right (80%)
+                                                html.Div([
+                                                        dcc.Graph(
+                                                                id='color-color-plot',
+                                                                style={'height': '100%'},
+                                                                config={'responsive': True}
+                                                        )
+                                                ], style={
+                                                        'width': '80%',
+                                                        'boxSizing': 'border-box'
+                                                })
+                                        ], style={
+                                                'display': 'flex',
+                                                'height': 'calc(100% - 40px)',
+                                                'gap': '10px'
+                                        })
+                                ], style={
+                                        'flex': '1',
+                                        'minWidth': '400px',
+                                        'border': '2px solid #7b1fa2',
+                                        'padding': '15px',
+                                        'boxSizing': 'border-box',
+                                        'display': 'flex',
+                                        'flexDirection': 'column'
+                                })
+                        ], style={
+                                'display': 'flex',
+                                'gap': '10px',
+                                'padding': '10px',
+                                'height': '40vh',
+                                'minHeight': '300px',
+                                'flexWrap': 'wrap'  # Allow wrapping on small screens
+                        }),
+                        
+                        # Pane 4: Redshift Estimates (bottom)
+                        html.Div([
+                                html.H3("Redshift Estimates", style={'margin': '0 0 10px 0'}),
+                                html.Div([
+                                        # Controls on the left (20%)
+                                        html.Div([
+                                                self._create_redshift_controls()
+                                        ], style={
+                                                'width': '20%',
+                                                'minWidth': '150px',
+                                                'paddingRight': '10px',
+                                                'boxSizing': 'border-box',
+                                                'overflowY': 'auto'
+                                        }),
+                                        # Plot on the right (80%)
+                                        html.Div([
+                                                dcc.Graph(
+                                                        id='redshift-plot',
+                                                        style={'height': '100%'},
+                                                        config={'responsive': True}
+                                                )
+                                        ], style={
+                                                'width': '80%',
+                                                'boxSizing': 'border-box'
+                                        })
+                                ], style={
+                                        'display': 'flex',
+                                        'height': 'calc(100% - 40px)',
+                                        'gap': '10px'
+                                })
+                        ], style={
+                                'border': '2px solid #388e3c',
+                                'padding': '15px',
+                                'margin': '10px',
+                                'boxSizing': 'border-box',
+                                'height': 'calc(50vh - 20px)',
+                                'minHeight': '300px',
+                                'display': 'flex',
+                                'flexDirection': 'column'
+                        })
                 ], style={
-                    'width': '100%',
-                    'height': '50vh',
-                    'border': '2px solid #388e3c',
-                    'padding': '10px',
-                    'boxSizing': 'border-box'
+                        'height': 'calc(100vh - 84px)',  # Subtract header height
+                        'overflow': 'auto',
+                        'display': 'flex',
+                        'flexDirection': 'column'
                 }),
-
-                html.Div([], style={
-                    'width': '100%',
-                    'height': '10vh',
-                    'border': '2px solid #388e3c',
-                    'padding': '10px',
-                    'boxSizing': 'border-box'
-                }),
-
-                    
-            ], style={
+                
+                # Hidden div to store current object data
+                html.Div(id='current-object-idx', style={'display': 'none'}, 
+                        children=str(self.current_object_idx))
+        ], style={
                 'margin': '0',
                 'padding': '0',
                 'height': '100vh',
-                'overflow': 'hidden'                
-            }),
-            
-            # Hidden div to store current object data
-            html.Div(id='current-object-idx', style={'display': 'none'}, 
-                    children=str(self.current_object_idx))
-        ])
-    
+                'overflow': 'hidden',
+                'fontFamily': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+        })
+        
+        
     def _create_selection_pane(self):
         """Create the object selection controls."""
-        n_objects = self.catalog.get_nobjects()
-        
-        # Get initial object to determine number of bands
-        obj = self.catalog.get_object(0)
-        band_names = obj.get_band_names()
-        
-        selection_controls = [
-            html.Label("Select Object:"),
-            dcc.Slider(
-                id='object-slider',
-                min=0,
-                max=n_objects - 1,
-                value=0,
-                marks={i: str(i) for i in range(0, n_objects, max(1, n_objects // 10))},
-                step=1,
-                tooltip={"placement": "bottom", "always_visible": True}
-            ),
-        ]
-        
-        return html.Div(selection_controls)
+        # This method is no longer needed as controls are inline
+        pass
     
     def _create_color_controls(self):
         """Create controls for color-color diagram."""
@@ -174,11 +308,44 @@ class AstronomicalDataVisualizer:
         """Setup all interactive callbacks."""
         
         @self.app.callback(
-            Output('current-object-idx', 'children'),
-            Input('object-slider', 'value')
+            [Output('current-object-idx', 'children'),
+             Output('object-slider', 'value')],
+            [Input('back-button', 'n_clicks'),
+             Input('next-button', 'n_clicks'),
+             Input('object-slider', 'value')],
+            [State('current-object-idx', 'children')]
         )
-        def update_object_idx(idx):
-            return str(idx)
+        def update_object_idx(back_clicks, next_clicks, slider_value, current_idx):
+            ctx = dash.callback_context
+            if not ctx.triggered:
+                return str(self.current_object_idx), self.current_object_idx
+                
+            trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
+            current_idx = int(current_idx)
+            
+            if trigger_id == 'next-button':
+                new_idx = min(current_idx + 1, self.n_objects - 1)
+            elif trigger_id == 'back-button':
+                new_idx = max(current_idx - 1, 0)
+            elif trigger_id == 'object-slider':
+                new_idx = slider_value
+            else:
+                new_idx = current_idx
+                
+            return str(new_idx), new_idx
+        
+        @self.app.callback(
+            [Output('back-button', 'disabled'),
+             Output('next-button', 'disabled'),
+             Output('object-counter', 'children')],
+            [Input('current-object-idx', 'children')]
+        )
+        def update_navigation_state(idx_str):
+            idx = int(idx_str)
+            back_disabled = (idx == 0)
+            next_disabled = (idx == self.n_objects - 1)
+            counter_text = f"{idx + 1} of {self.n_objects}"
+            return back_disabled, next_disabled, counter_text
         
         @self.app.callback(
             [Output('color-x-dropdown', 'options'),
@@ -208,7 +375,6 @@ class AstronomicalDataVisualizer:
             idx = int(idx_str)
             obj = self.catalog.get_object(idx)
             estimate_names = obj.get_estimate_names()
-            
             options = [{'label': name, 'value': name} for name in estimate_names]
             # By default, select all estimates
             values = estimate_names
@@ -384,7 +550,7 @@ class AstronomicalDataVisualizer:
             )
             
             return fig
-    
+        
     def run(self, debug=True, port=8050):
         """Run the Dash application."""
         self.app.run(debug=debug, port=port)
