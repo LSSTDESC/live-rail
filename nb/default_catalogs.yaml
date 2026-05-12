@@ -1,0 +1,186 @@
+# Information about a filter bands
+# For each band this is just a name and a reddening
+# parameter: a_env.   
+
+# The name is used for lookup and should be unique.
+# It should match the name of the associated filter file.
+#
+# These are typically found in:
+# rail_base/src/rail/examples_data/estimation_data/data/FILTER
+#
+# The a_env parameter can be computed from filter 
+# curves using code in `rail_astro_tools`:
+#
+# https://github.com/LSSTDESC/rail_astro_tools/blob/main/src/rail/tools/filter_tools.py
+Bands:
+  - Band:
+      name: comcam_u
+      a_env: 4.81
+  - Band:
+      name: comcam_g
+      a_env: 3.64
+  - Band:
+      name: comcam_r
+      a_env: 2.70
+  - Band:
+      name: comcam_i
+      a_env: 2.06
+  - Band:
+      name: comcam_z
+      a_env: 1.58
+  - Band:
+      name: comcam_y
+      a_env: 1.31
+  - Band:
+      name: DC2LSST_u
+      a_env: 4.81
+  - Band:
+      name: DC2LSST_g
+      a_env: 3.64
+  - Band:
+      name: DC2LSST_r
+      a_env: 2.70
+  - Band:
+      name: DC2LSST_i
+      a_env: 2.06
+  - Band:
+      name: DC2LSST_z
+      a_env: 1.58
+  - Band:
+      name: DC2LSST_y
+      a_env: 1.31
+#
+# Particulars about specific catalogs.
+# 
+# These keep track of things like the mapping between band names and columns,
+# names of special columns like the objectId and the 'true' redshift, guard
+# values used to specify non-detections or non-observations.
+#
+# The mapping between bands and magnitude, magnitude error columns
+# is constructed by looping over the band_list add resolving
+# mag_column_template and mag_err_column_template.
+#
+# Similarly, the mapping between bands and filters is constructed
+# by looping over the band_list add resolving filter_template.
+#
+# The `bands` field is used to provide band-specific overrides.
+# At a minimum this must include 5-sigma limiting magnitdues.
+#
+# But it may also include specfic overrides for the names of the
+# mag_column, mag_err_columns and filter template file, for example when a
+# subset of band_list entries do not follow the patterns in the templates.
+#
+CatalogTags:
+  - CatalogTag:
+      name: "com_cam"
+      mag_column_template: "{band}_cModelMag"
+      mag_err_column_template: "{band}_cModelMagErr"
+      filter_template: "comcam_{band}"
+      band_list: ['u', 'g', 'r', 'i', 'z', 'y']
+      bands:
+        u:
+          mag_limit: 26.4
+        g:
+          mag_limit: 27.8
+        r:
+          mag_limit: 27.1
+        i:
+          mag_limit: 26.7
+        z:
+          mag_limit: 25.8
+        y:
+          mag_limit: 24.6
+  - CatalogTag:
+      name: "dc2"
+      mag_column_template: "mag_{band}_cModel_obj_dered"
+      mag_err_column_template: "magerr_{band}_cModel_obj"
+      redshift_col: "redshift_true"
+      object_id_col: "objectId_obj"
+      filter_template: "DC2LSST_{band}"
+      band_list: ['u', 'g', 'r', 'i', 'z', 'y']
+      bands:
+        u:
+          mag_limit: 24.0
+        g:
+          mag_limit: 27.66
+        r:
+          mag_limit: 27.25
+        i:
+          mag_limit: 26.6
+        z:
+          mag_limit: 26.24
+        y:
+          mag_limit: 23.35
+  - CatalogTag:
+      name: "rubin"
+      mag_column_template: "LSST_obs_{band}"
+      mag_err_column_template: "LSST_obs_{band}_err"
+      redshift_col: "true_redshift"
+      filter_template: "DC2LSST_{band}"
+      band_list: ['u', 'g', 'r', 'i', 'z', 'y']
+      bands:
+        u:
+          mag_limit: 24.0
+        g:
+          mag_limit: 27.66
+        r:
+          mag_limit: 27.25
+        i:
+          mag_limit: 26.6
+        z:
+          mag_limit: 26.24
+        y:
+          mag_limit: 23.35
+  - CatalogTag:
+      name: "com_cam_gaap"
+      mag_column_template: "{band}_gaap1p0Mag"
+      mag_err_column_template: "{band}_gaap1p0MagErr"
+      filter_template: "comcam_{band}"
+      band_list: ['u', 'g', 'r', 'i', 'z', 'y']
+      bands:
+        u:
+          mag_limit: 26.5
+        g:
+          mag_limit: 27.8
+        r:
+          mag_limit: 27.1
+        i:
+          mag_limit: 26.7
+        z:
+          mag_limit: 25.8
+        y:
+          mag_limit: 24.6
+  - CatalogTag:
+      name: "com_cam_gaap_4band"
+      mag_column_template: "{band}_gaap1p0Mag"
+      mag_err_column_template: "{band}_gaap1p0MagErr"
+      filter_template: "comcam_{band}"
+      band_list: ['g', 'r', 'i', 'z']
+      bands:
+        g:
+          mag_limit: 27.8
+        r:
+          mag_limit: 27.1
+        i:
+          mag_limit: 26.7
+        z:
+          mag_limit: 25.8
+  - CatalogTag:
+      name: "com_cam_kron"
+      mag_column_template: "{band}_kronMag"
+      mag_err_column_template: "{band}_kronMagErr"
+      filter_template: "comcam_{band}"
+      band_list: ['u', 'g', 'r', 'i', 'z', 'y']
+      bands:
+        u:
+          mag_limit: 26.5
+        g:
+          mag_limit: 27.8
+        r:
+          mag_limit: 27.1
+        i:
+          mag_limit: 26.7
+        z:
+          mag_limit: 25.8
+        y:
+          mag_limit: 24.6

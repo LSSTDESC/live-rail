@@ -31,7 +31,7 @@ class RailSvcCatalogWrapper:
         for assoc_ in self._catalog_band_assocs:
             assoc_band = local_sync.band.get_row(assoc_.band_id)
             self._mag_column_map[assoc_band.name] = assoc_.mag_column_name
-            self._mag_err_column_map[assoc_band.name] = assoc_.mag_column_name   
+            self._mag_err_column_map[assoc_band.name] = assoc_.mag_err_column_name   
         
     def get_object(self, row: int) -> ObjectWrapper:
         return ObjectWrapper(self, row)
@@ -57,7 +57,7 @@ class RailSvcCatalogWrapper:
         except:
             true_redshfit = np.nan
 
-        return mag_vals, mag_err_vals, estimates, true_redshift
+        return np.squeeze(mag_vals), np.squeeze(mag_err_vals), estimates, true_redshift
         
     
 

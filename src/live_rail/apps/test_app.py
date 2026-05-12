@@ -1,3 +1,5 @@
+
+import asyncio
 import dash
 from dash import dcc, html, Input, Output, State, callback
 import plotly.graph_objs as go
@@ -5,7 +7,12 @@ import numpy as np
 from typing import Optional
 import plotly.express as px
 
-from ..wrappers.object_wrappget import CatalogWrapper
+from pathlib import Path
+from rail.utils import catalog_utils
+from rail_svc import db, local_sync
+
+from live_rail.wrappers.object_wrapper import CatalogWrapper
+from live_rail.wrappers.rail_svc_wrapper import RailSvcCatalogWrapper
 
 
 class AstronomicalDataVisualizer:
@@ -89,22 +96,6 @@ class AstronomicalDataVisualizer:
                 step=1,
                 tooltip={"placement": "bottom", "always_visible": True}
             ),
-            html.Br(),
-            html.Label("Adjust Flux Values:", style={'marginTop': 20}),
-            html.Div(id='flux-sliders-container', children=[
-                html.Div([
-                    html.Label(f"{band}:"),
-                    dcc.Slider(
-                        id={'type': 'flux-slider', 'band': band},
-                        min=-2,  # Magnitude adjustment range
-                        max=2,
-                        value=0,
-                        step=0.01,
-                        marks={i: f"{i:+.1f}" for i in range(-2, 3)},
-                        tooltip={"placement": "bottom", "always_visible": True}
-                    )
-                ], style={'marginBottom': 10}) for band in band_names
-            ])
         ]
         
         return html.Div(selection_controls)
@@ -186,22 +177,17 @@ class AstronomicalDataVisualizer:
         
         @self.app.callback(
             Output('spectrum-plot', 'figure'),
-            [Input('current-object-idx', 'children'),
-             Input({'type': 'flux-slider', 'band': dash.dependencies.ALL}, 'value')]
+            [Input('current-object-idx', 'children')]
         )
-        def update_spectrum(idx_str, flux_adjustments):
+        def update_spectrum(idx_str):
             idx = int(idx_str)
             obj = self.catalog.get_object(idx)
             
             spectrum_data = obj.get_spectrum()
             band_names = obj.get_band_names()
-            wavelengths = spectrum_data['wavelengths']  # or appropriate key
+            wavelengths = spectrum_data['midpoints']  # or appropriate key
             mags = spectrum_data['mags'].copy()
             mag_errors = spectrum_data['mag_errors']
-            
-            # Apply flux adjustments (magnitude offsets)
-            if flux_adjustments:
-                mags = mags + np.array(flux_adjustments)
             
             fig = go.Figure()
             
@@ -210,31 +196,24 @@ class AstronomicalDataVisualizer:
                 x=wavelengths,
                 y=mags,
                 error_y=dict(type='data', array=mag_errors),
-                mode='markers+lines',
+                mode='markers',
                 name='Photometry',
                 marker=dict(size=10),
-                line=dict(width=2)
+                line=dict(width=2),
             ))
             
             fig.update_layout(
                 xaxis_title='Wavelength (Å)',
                 yaxis_title='Magnitude (AB)',
-                yaxis_autorange='reversed',  # Magnitudes increase downward
+                #yaxis_autorange='reversed',  # Magnitudes increase downward
                 hovermode='closest',
                 template='plotly_white',
                 height=400
             )
-            
-            # Add band labels
-            for i, (wl, band) in enumerate(zip(wavelengths, band_names)):
-                fig.add_annotation(
-                    x=wl, y=mags[i],
-                    text=band,
-                    showarrow=True,
-                    arrowhead=2,
-                    ax=0, ay=-30
-                )
-            
+
+            fig.update_xaxes(range=[3000, 10000])                        
+            fig.update_yaxes(range=[30, 15])            
+                        
             return fig
         
         @self.app.callback(
@@ -242,21 +221,16 @@ class AstronomicalDataVisualizer:
             [Input('current-object-idx', 'children'),
              Input('color-x-dropdown', 'value'),
              Input('color-y-dropdown', 'value'),
-             Input({'type': 'flux-slider', 'band': dash.dependencies.ALL}, 'value')]
+            ]
         )
-        def update_color_color(idx_str, x_color, y_color, flux_adjustments):
+        def update_color_color(idx_str, x_color, y_color):
             idx = int(idx_str)
             obj = self.catalog.get_object(idx)
             
-            # Get adjusted magnitudes
             mags = obj.get_magnitudes().copy()
             mag_errors = obj.get_magnitude_errors()
             band_names = obj.get_band_names()
-            
-            if flux_adjustments:
-                mags = mags + np.array(flux_adjustments)
-            
-            # Recalculate colors with adjusted magnitudes
+                        
             colors = {}
             n = len(band_names)
             for i in range(n-1):
@@ -282,8 +256,11 @@ class AstronomicalDataVisualizer:
                 error_y=dict(type='data', array=[y_err]),
                 mode='markers',
                 marker=dict(size=15, color='red'),
-                name='Selected Object'
+                name='Selected Object',
             ))
+
+            fig.update_xaxes(range=[-3, 3])
+            fig.update_yaxes(range=[-3, 3])            
             
             # Optionally: Add all objects from catalog for context
             # This would require iterating through catalog
@@ -349,9 +326,9 @@ class AstronomicalDataVisualizer:
             
             # Add true redshift if available
             true_z = obj.get_true_redshift()
-            if true_z is not None and z_range[0] <= true_z <= z_range[1]:
+            if true_z is not None and z_range[0] <= true_z[0] <= z_range[1]:
                 fig.add_vline(
-                    x=true_z,
+                    x=true_z[0],
                     line=dict(color='black', width=2, dash='dash'),
                     annotation_text='True z',
                     annotation_position='top'
@@ -370,9 +347,23 @@ class AstronomicalDataVisualizer:
     
     def run(self, debug=True, port=8050):
         """Run the Dash application."""
-        self.app.run_server(debug=debug, port=port)
+        self.app.run(debug=debug, port=port)
 
 
-# Example usage:
-# visualizer = AstronomicalDataVisualizer(my_catalog_wrapper)
-# visualizer.run()
+    @classmethod
+    def main(cls):
+
+        try:
+            asyncio.run(db.close_db())
+        except:
+            pass
+        db.init_db()
+        catalog_utils.load_yaml('default_catalogs.yaml')
+        wrapper = RailSvcCatalogWrapper(1)
+        viz = AstronomicalDataVisualizer(wrapper)
+        viz.run(debug=False, port=8051)
+
+        
+if __name__ == '__main__':
+
+    AstronomicalDataVisualizer.main()

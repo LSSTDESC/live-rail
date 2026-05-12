@@ -77,8 +77,8 @@ class ObjectWrapper:
         return ret_dict
     
     def get_spectrum(self) -> dict[str, np.ndarray]:
-        ret_dict = self.get_band_midpoints()
-        ret_dict.update(
+        ret_dict = dict(
+            midpoints=self.get_band_midpoints(),
             mags=self.get_magnitudes(),
             mag_errors=self.get_magnitude_errors(),
         )
