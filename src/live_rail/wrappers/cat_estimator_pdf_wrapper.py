@@ -26,7 +26,7 @@ class CatEstimatorPdfWrapper:
         self._estimator = cat_estimator
         self._estimator.open_model(**self._estimator.config)
         self._estimator.data_store.clear()
-        self._estimator._input_length = 1
+        self._estimator._input_length = n_obj
         self._estimator._initialize_run()
         self._names = names.copy
         self._n_obj = n_obj

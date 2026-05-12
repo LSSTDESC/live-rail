@@ -24,6 +24,7 @@ dependencies = [
     "pz-rail-base>=2.0",
     "matplotlib",
     "plotly",
+    "click",
     "dash",
     "jupyter",
     "jupyter-dash",
@@ -53,6 +54,8 @@ docs = [
     "sphinx-click", # Used for command line interface docs
 ]
 
+[project.scripts]
+live-rail = "live_rail.cli.commands:cli"
 
 [build-system]
 requires = ["setuptools>=62", "wheel", "setuptools_scm[toml]>=6.2"]

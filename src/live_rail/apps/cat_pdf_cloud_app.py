@@ -79,8 +79,8 @@ def build_cat_pdf_cloud_app(wrapper):
         yvals = data.pdf(xvals)
     
         fig = go.Figure()
-        for y_ in yvals:
-            fig.add_trace(go.Scatter(x=xvals, y=y_, mode='lines'))
+        for i, y_ in enumerate(yvals):
+            fig.add_trace(go.Scatter(x=xvals, y=y_, mode='lines', name=f"pdf {i}"))
         fig.update_layout(
             title='PDF',
             xaxis_title='z',
