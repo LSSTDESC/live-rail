@@ -34,42 +34,82 @@ class AstronomicalDataVisualizer:
     def setup_layout(self):
         """Create the 4-pane layout for the dashboard."""
         self.app.layout = html.Div([
-            html.H1("Astronomical Object Viewer", 
+            html.H1("Redshift explorer", 
                    style={'textAlign': 'center', 'marginBottom': 30}),
             
             # Main container with grid layout
             html.Div([
-                # Pane 1: Object Selection (top-left)
+                # Pane 1: Object Selection (top)
                 html.Div([
                     html.H3("Object Selection"),
                     self._create_selection_pane()
-                ], style={'padding': 10}, className='pane'),
+                ],  style={
+                    'width': '100%',
+                    'height': '10vh',
+                    'padding': '10px',
+                    'boxSizing': 'border-box'
+                }),
                 
-                # Pane 2: Spectrum (top-right)
                 html.Div([
-                    html.H3("Photometric Spectrum"),
-                    dcc.Graph(id='spectrum-plot')
-                ], style={'padding': 10}, className='pane'),
+
+                    # Pane 2: Spectrum (left mid)
+                    html.Div([
+                        html.H3("Photometric Spectrum"),
+                        dcc.Graph(id='spectrum-plot')
+                    ], style={
+                        'width': '50%',
+                        'height': '30vh',
+                        'border': '2px solid #f57c00',
+                        'padding': '10px',
+                        'boxSizing': 'border-box',
+                        'display': 'inline-block',
+                        'verticalAlign': 'top'
+                    }),
+                    
+                    # Pane 3: Color-Color Diagram (right mid)
+                    html.Div([
+                        html.H3("Color-Color Relations"),
+                        self._create_color_controls(),
+                        dcc.Graph(id='color-color-plot')
+                    ], style={
+                        'width': '50%',
+                        'height': '30vh',
+                        'border': '2px solid #7b1fa2',
+                        'padding': '10px',
+                        'boxSizing': 'border-box',
+                        'display': 'inline-block',
+                        'verticalAlign': 'top'
+                    }),
+
+                ],  style={}),  # Remove whitespace between inline-block elements
                 
-                # Pane 3: Color-Color Diagram (bottom-left)
-                html.Div([
-                    html.H3("Color-Color Relations"),
-                    self._create_color_controls(),
-                    dcc.Graph(id='color-color-plot')
-                ], style={'padding': 10}, className='pane'),
-                
-                # Pane 4: Redshift Estimates (bottom-right)
+                # Pane 4: Redshift Estimates (bottom)
                 html.Div([
                     html.H3("Redshift Estimates"),
                     self._create_redshift_controls(),
                     dcc.Graph(id='redshift-plot')
-                ], style={'padding': 10}, className='pane'),
+                ], style={
+                    'width': '100%',
+                    'height': '50vh',
+                    'border': '2px solid #388e3c',
+                    'padding': '10px',
+                    'boxSizing': 'border-box'
+                }),
+
+                html.Div([], style={
+                    'width': '100%',
+                    'height': '10vh',
+                    'border': '2px solid #388e3c',
+                    'padding': '10px',
+                    'boxSizing': 'border-box'
+                }),
+
+                    
             ], style={
-                'display': 'grid',
-                'gridTemplateColumns': '1fr 1fr',
-                'gridTemplateRows': 'auto auto',
-                'gap': '20px',
-                'padding': '20px'
+                'margin': '0',
+                'padding': '0',
+                'height': '100vh',
+                'overflow': 'hidden'                
             }),
             
             # Hidden div to store current object data
@@ -205,14 +245,14 @@ class AstronomicalDataVisualizer:
             fig.update_layout(
                 xaxis_title='Wavelength (Å)',
                 yaxis_title='Magnitude (AB)',
-                #yaxis_autorange='reversed',  # Magnitudes increase downward
+                yaxis_autorange='reversed',  # Magnitudes increase downward
                 hovermode='closest',
                 template='plotly_white',
                 height=400
             )
 
             fig.update_xaxes(range=[3000, 10000])                        
-            fig.update_yaxes(range=[30, 15])            
+            #fig.update_yaxes(range=[30, 15])            
                         
             return fig
         
