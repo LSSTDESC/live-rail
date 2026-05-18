@@ -1,6 +1,6 @@
 
-from .test_app import AstronomicalDataVisualizer
+from .test_app import SingleCatalogRedshiftVisualizer
 
 __all__ = [
-    'AstronomicalDataVisualizer',
+    'SingleCatalogRedshiftVisualizer',
 ]

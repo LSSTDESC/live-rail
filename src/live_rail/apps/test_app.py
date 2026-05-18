@@ -14,7 +14,7 @@ from live_rail.wrappers.object_wrapper import CatalogWrapper
 from live_rail.wrappers.rail_svc_wrapper import RailSvcCatalogWrapper
 
 
-class AstronomicalDataVisualizer:
+class SingleCatalogRedshiftVisualizer:
     def __init__(self, catalog_wrapper):
         """
         Initialize the visualizer with a CatalogWrapper instance.
@@ -564,12 +564,12 @@ class AstronomicalDataVisualizer:
         except:
             pass
         db.init_db()
-        catalog_utils.load_yaml('default_catalogs.yaml')
-        wrapper = RailSvcCatalogWrapper(1)
-        viz = AstronomicalDataVisualizer(wrapper)
+        catalog_utils.load_yaml('sandbox_catalogs.yaml')
+        wrapper = RailSvcCatalogWrapper(3)
+        viz = SingleCatalogRedshiftVisualizer(wrapper)
         viz.run(debug=False, port=8051)
 
         
 if __name__ == '__main__':
 
-    AstronomicalDataVisualizer.main()
+    SingleCatalogRedshiftVisualizer.main()
