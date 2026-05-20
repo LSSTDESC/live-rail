@@ -1500,7 +1500,7 @@ class CatalogRedshiftVisualizer:
         # Create and run visualizer
         try:
             viz = CatalogRedshiftVisualizer(wrapper, catalog_name=catalog_name)
-            viz.run(debug=True, port=8051)  # Set debug=True to see detailed logs
+            viz.run(debug=True, port=8052)  # Set debug=True to see detailed logs
         except Exception as e:
             logger.error(f"Failed to run visualizer: {e}", exc_info=True)
             raise
