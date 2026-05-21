@@ -1479,7 +1479,7 @@ class CatalogRedshiftVisualizer:
         
         # Load catalog configuration
         try:
-            catalog_utils.load_yaml('sandbox_catalogs.yaml')
+            catalog_utils.load_yaml('nb/sandbox_catalogs.yaml')
             logger.info("Loaded catalog configuration from sandbox_catalogs.yaml")
         except FileNotFoundError as e:
             logger.error("Catalog configuration file not found: sandbox_catalogs.yaml")

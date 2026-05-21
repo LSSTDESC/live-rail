@@ -550,7 +550,7 @@ class MultiCatalogRedshiftVisualizer:
         
         # Initialize
         db.init_db()
-        catalog_utils.load_yaml('sandbox_catalogs.yaml')
+        catalog_utils.load_yaml('nb/sandbox_catalogs.yaml')
         wrapper = RailSvcSimpleMultiCatalogWrapper(3)
         
         # Run
