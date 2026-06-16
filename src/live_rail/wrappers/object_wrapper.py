@@ -38,7 +38,7 @@ class ObjectWrapper:
     ) -> float:
         try:
             return float(np.squeeze(ensemble.ancil['zmode']))
-        except:
+        except (KeyError, TypeError, ValueError):
             return 0.
 
     @staticmethod
@@ -47,7 +47,7 @@ class ObjectWrapper:
     ) -> float:
         try:
             return float(np.squeeze(ensemble.ancil['rms']))
-        except:
+        except (KeyError, TypeError, ValueError):
             return 0.
 
     def __init__(self, parent: CatalogWrapper, row: int):
@@ -93,7 +93,7 @@ class ObjectWrapper:
         return {k:np.squeeze(v.pdf(grid)) for k, v in all_pdfs.items()}
         
     def get_colors(self) -> dict[str, tuple[float, float]]:
-        ret_dict: str = {}
+        ret_dict: dict[str, tuple[float, float]] = {}
         band_names = self.get_band_names()
         mags = self.get_magnitudes()
         mag_errors = self.get_magnitude_errors()        
@@ -136,11 +136,11 @@ class MultiObjectWapper(ObjectWrapper):
         self._objects = objects
 
     @property
-    def objects(self):
+    def objects(self) -> dict[str, ObjectWrapper]:
         return self._objects
         
-    def get_objects(self, catalogs: list[str]) -> dict[str, ObjectWraper]:
-        ret_dict: dict[str, ObjectWraper] = {}
+    def get_objects(self, catalogs: list[str]) -> dict[str, ObjectWrapper]:
+        ret_dict: dict[str, ObjectWrapper] = {}
         for key in catalogs:
             any_object = self._objects[key]
             ret_dict[key] = any_object
@@ -173,7 +173,7 @@ class CatalogWrapper(ABC):
         pass
     
     @abstractmethod    
-    def get_data(self, row: int) -> tuple[np.ndarry, np.ndarray, dict[str, qp.Ensemble], float|None, dict[str, np.ndarray]]:
+    def get_data(self, row: int) -> tuple[np.ndarray, np.ndarray, dict[str, qp.Ensemble], float|None, dict[str, np.ndarray]]:
         pass
 
 
@@ -191,7 +191,7 @@ class MultiCatalogWrapper(CatalogWrapper):
         return self._matched_catalog.get_nobjects()
     
     def get_estimates(self, idx: int) -> dict[str, qp.Ensemble]:
-        return self._matched_catalog.get_estimates(idx)
+        return self._matched_catalog.get_object(idx).get_redshift_estimates()
     
     def get_estimate_names(self) -> list[str]:
         return self._matched_catalog.get_estimate_names()
@@ -202,7 +202,7 @@ class MultiCatalogWrapper(CatalogWrapper):
     def get_band_midpoints(self) -> np.ndarray:
         return self._matched_catalog.get_band_midpoints()
 
-    def get_component_data(self, row: int) -> tuple[np.ndarry, np.ndarray, dict[str, qp.Ensemble], float|None]:
+    def get_component_data(self, row: int) -> tuple[np.ndarray, np.ndarray, dict[str, qp.Ensemble], float|None]:
         all_mag_vals: list[np.ndarray] = []
         all_mag_err_vals: list[np.ndarray] = []
         the_true_redshift: float|None= None
@@ -238,10 +238,10 @@ class MultiCatalogWrapper(CatalogWrapper):
         return self._catalogs[catalog_name]
 
     def get_catalog_band_names(self) -> dict[str, list[str]]:
-        return {key: val.get_band_names() for key, val in self._catalogs}
+        return {key: val.get_band_names() for key, val in self._catalogs.items()}
 
     def get_catalog_band_midpoints(self) -> dict[str, np.ndarray]:
-        return {key: val.get_band_midpoints() for key, val in self._catalogs}
+        return {key: val.get_band_midpoints() for key, val in self._catalogs.items()}
 
     def get_catalog_estimate_names(self) -> dict[str, list[str]]:
-        return {key: val.get_estimate_names() for key, val in self._catalogs}
+        return {key: val.get_estimate_names() for key, val in self._catalogs.items()}

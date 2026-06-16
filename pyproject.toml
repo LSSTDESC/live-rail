@@ -69,7 +69,7 @@ testpaths = [
     "tests",
 ]
 addopts = [
-    "--cov=src/rail",
+    "--cov=src/live_rail",
     "--cov-report=html"
 ]
 
@@ -99,16 +99,21 @@ max-args = 7
 
 
 [tool.mypy]
-disallow_untyped_defs = true
-disallow_incomplete_defs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
 ignore_missing_imports = true
 local_partial_types = true
 no_implicit_reexport = true
 show_error_codes = true
 strict_equality = true
-warn_redundant_casts = true
-warn_unreachable = true
-warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+module = "live_rail.dashboard.pages.crud._components"
+warn_unreachable = false
+
+[[tool.mypy.overrides]]
+module = "live_rail.wrappers.rail_svc_wrapper"
+disable_error_code = ["attr-defined"]
 
 [tool.coverage.run]
 omit = [

@@ -3,7 +3,6 @@ import dash
 from dash import dcc, html, Input, Output, State, ALL
 import plotly.graph_objs as go
 import numpy as np
-from typing import Optional, List, Dict, Tuple
 import plotly.express as px
 import logging
 
@@ -11,7 +10,7 @@ from rail.utils import catalog_utils
 from rail_svc import db
 
 from live_rail.wrappers.object_wrapper import MultiCatalogWrapper
-from live_rail.wrappers.rail_svc_wrapper import RailSvcSimpleMultiCatalogWrapper
+from live_rail.wrappers.rail_svc_wrapper import RailSvcLocalSimpleMultiCatalogWrapper
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -551,7 +550,7 @@ class MultiCatalogRedshiftVisualizer:
         # Initialize
         db.init_db()
         catalog_utils.load_yaml('nb/sandbox_catalogs.yaml')
-        wrapper = RailSvcSimpleMultiCatalogWrapper(3)
+        wrapper = RailSvcLocalSimpleMultiCatalogWrapper(3)
         
         # Run
         viz = cls(wrapper)

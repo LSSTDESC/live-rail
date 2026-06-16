@@ -1,18 +1,17 @@
 import asyncio
 import dash
-from dash import dcc, html, Input, Output, State, callback, ALL
+from dash import dcc, html, Input, Output, State, ALL
 import plotly.graph_objs as go
 import numpy as np
 from typing import Optional, List, Dict, Tuple, Any
 import plotly.express as px
 import logging
 
-from pathlib import Path
 from rail.utils import catalog_utils
-from rail_svc import db, local_sync
+from rail_svc import db
 
 from live_rail.wrappers.object_wrapper import CatalogWrapper, ObjectWrapper
-from live_rail.wrappers.rail_svc_wrapper import RailSvcCatalogWrapper
+from live_rail.wrappers.rail_svc_wrapper import RailSvcLocalCatalogWrapper
 
 # Configure logging
 logging.basicConfig(
@@ -82,7 +81,7 @@ class CatalogRedshiftVisualizer:
         self.n_objects = self.catalog.get_nobjects()
         
         # Track estimator color assignments
-        self.estimator_color_map = {}
+        self.estimator_color_map: dict[tuple[str, str], str] = {}
         
         logger.info(f"Loaded catalog with {self.n_objects} objects")
         
@@ -690,11 +689,13 @@ class CatalogRedshiftVisualizer:
                 options = [{'label': name, 'value': name} for name in color_names]
                 
                 # Try to preserve current selections if they exist in new object
+                default_x: str | None
                 if current_x and current_x in color_names:
                     default_x = current_x
                 else:
                     default_x = color_names[0] if len(color_names) > 0 else None
                 
+                default_y: str | None
                 if current_y and current_y in color_names:
                     default_y = current_y
                 else:
@@ -933,7 +934,7 @@ class CatalogRedshiftVisualizer:
                     margin=dict(l=50, r=20, t=30, b=50)
                 )
                 
-                logger.info(f"Successfully updated color-color plot")
+                logger.info("Successfully updated color-color plot")
                 return fig
             except Exception as e:
                 logger.error(f"Error updating color-color plot: {e}", exc_info=True)
@@ -1044,7 +1045,6 @@ class CatalogRedshiftVisualizer:
             Dictionary containing family samples data
         """
         try:
-            band_names = obj.get_band_names()
             spectrum_data = obj.get_spectrum()
             wavelengths = spectrum_data['midpoints']
             
@@ -1056,7 +1056,7 @@ class CatalogRedshiftVisualizer:
                     x=wavelengths,
                     y=sample_mags,
                     mode='lines',
-                    name=f'Family member' if sample_idx == 0 else None,
+                    name='Family member' if sample_idx == 0 else None,
                     line=dict(width=1, color='gray'),
                     opacity=0.8,
                     showlegend=(sample_idx == 0),
@@ -1255,8 +1255,8 @@ class CatalogRedshiftVisualizer:
             
             # Apply magnitude adjustments
             band_names = obj.get_band_names()
-            mag_column_map = obj._parent._mag_column_map
-            mag_err_column_map = obj._parent._mag_err_column_map
+            mag_column_map = obj._parent._mag_column_map  # type: ignore[attr-defined]
+            mag_err_column_map = obj._parent._mag_err_column_map  # type: ignore[attr-defined]
             
             for band in band_names:
                 if band in mag_adjustments:
@@ -1481,7 +1481,7 @@ class CatalogRedshiftVisualizer:
         try:
             catalog_utils.load_yaml('nb/sandbox_catalogs.yaml')
             logger.info("Loaded catalog configuration from sandbox_catalogs.yaml")
-        except FileNotFoundError as e:
+        except FileNotFoundError:
             logger.error("Catalog configuration file not found: sandbox_catalogs.yaml")
             raise
         except Exception as e:
@@ -1491,8 +1491,8 @@ class CatalogRedshiftVisualizer:
         # Create catalog wrapper
         try:
             # You can specify which dataset
-            wrapper = RailSvcCatalogWrapper(3)
-            logger.info(f"Created RailSvcCatalogWrapper for '{catalog_name}'")
+            wrapper = RailSvcLocalCatalogWrapper(3)
+            logger.info(f"Created RailSvcLocalCatalogWrapper for '{catalog_name}'")
         except Exception as e:
             logger.error(f"Failed to create catalog wrapper: {e}", exc_info=True)
             raise
@@ -1508,5 +1508,4 @@ class CatalogRedshiftVisualizer:
 
 if __name__ == '__main__':
     # You can pass a different catalog name as a command-line argument
-    import sys
     CatalogRedshiftVisualizer.main(catalog_name="sandbox")

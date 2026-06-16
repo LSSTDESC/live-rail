@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Any, Type, TypeVar
+from typing import Any
 
 import click
 
