@@ -21,9 +21,11 @@ pip install -e '.[dev]'
 ## Quick Start
 
 ```bash
+# Set up test data (downloads data + initializes local SQLite DB)
+live-rail setup pzdc
 
-# Download data set set up local SQLite DB
-python scripts/setup_pzdc.py
+# Or skip the download if data is already present
+live-rail setup pzdc --skip-download
 
 # Launch the dashboard (uses local SQLite DB)
 live-rail dashboard --backend local --db-url "sqlite+aiosqlite:///rail_svc.db"
@@ -41,9 +43,11 @@ Then open http://127.0.0.1:8050 in your browser.
 
 ### CRUD Tables
 - AG Grid tables with sorting, filtering, and pagination
+- Multi-row selection with select-all checkbox (Bands, Catalog Tags)
 - Click entity names to see full details in a popup
 - Click FK columns (model_id, dataset_id, etc.) to see the referenced entity
 - Create and delete entities via modal forms
+- Band transmission curve visualization for selected bands/catalog tags
 
 ### Visualizers
 - **Single Catalog**: Photometric spectrum, color-color diagram (all adjacent pairs), and redshift PDF estimates for any object in a dataset
@@ -76,16 +80,40 @@ mypy src/
 pylint src/live_rail/ --rcfile=pyproject.toml
 ```
 
+## Data Setup
+
+The `live-rail setup` command manages data initialization. Setup profiles are extensible — each profile handles downloading data and populating the database.
+
+```bash
+# List available setup profiles
+live-rail setup --list-profiles dummy
+
+# Run a profile
+live-rail setup pzdc
+
+# Skip download (data already on disk)
+live-rail setup pzdc --skip-download
+
+# Override catalog YAML
+live-rail setup pzdc --catalog-yaml path/to/catalogs.yaml
+```
+
+Available profiles:
+- **pzdc** — Photo-z Data Challenge sandbox data (roman + rubin, 1yr + 10yr)
+
+To add a new profile, create a module in `src/live_rail/setup/` that subclasses `SetupProfile` and decorates with `@register`.
+
 ## Project Structure
 
 ```
 src/live_rail/
 ├── backend/          # BackendProvider — switches between local/remote rail_svc
-├── cli/              # Click CLI (live-rail dashboard)
+├── cli/              # Click CLI (live-rail dashboard, live-rail setup)
 ├── dashboard/        # Dash multi-page app
 │   ├── pages/crud/   # CRUD pages for each entity
 │   ├── pages/estimation/  # Estimation workflow pages
 │   └── pages/visualizers/ # Interactive visualizer pages
+├── setup/            # Extensible data setup profiles
 └── wrappers/         # CatalogWrapper abstractions for data access
 ```
 

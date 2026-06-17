@@ -43,3 +43,38 @@ def dashboard(
         catalog_yaml=catalog_yaml,
     )
     return 0
+
+
+@cli.command(name="setup")
+@click.argument("profile")
+@click.option("--skip-download", is_flag=True, default=False, help="Skip data download step")
+@click.option("--catalog-yaml", default=None, help="Override catalog YAML path")
+@click.option("--list-profiles", "list_profiles_flag", is_flag=True, default=False,
+              help="List available profiles")
+def setup(profile: str, skip_download: bool, catalog_yaml: str | None, list_profiles_flag: bool) -> None:
+    """Run a data setup profile.
+
+    PROFILE is the name of the setup profile to run (e.g. 'pzdc').
+    Use --list-profiles to see available options.
+    """
+    from live_rail.setup import get_profile, list_profiles
+
+    if list_profiles_flag:
+        profiles = list_profiles()
+        if not profiles:
+            click.echo("No setup profiles available.")
+        else:
+            click.echo("Available setup profiles:")
+            for name, desc in profiles:
+                click.echo(f"  {name:12s} {desc}")
+        return
+
+    try:
+        profile_cls = get_profile(profile)
+    except KeyError as e:
+        raise click.BadParameter(str(e), param_hint="'PROFILE'") from e
+
+    instance = profile_cls()
+    click.echo(f"Running setup profile: {instance.name}")
+    instance.run(skip_download=skip_download, catalog_yaml=catalog_yaml)
+    click.echo("Setup complete.")

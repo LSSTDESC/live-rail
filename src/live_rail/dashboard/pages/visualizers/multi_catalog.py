@@ -315,7 +315,17 @@ def update_spectrum_and_colors(idx, dataset_id, prev_estimates):
 
         spectrum_fig = go.Figure()
         color_fig = go.Figure()
-        all_estimate_names = []
+        combined_estimate_names = []
+        component_estimate_names = []
+
+        # Combined (matched) dataset estimates
+        matched_ds = provider.dataset.get_row(dataset_id)
+        matched_wrapper = _get_component_wrapper(dataset_id, provider)
+        matched_obj = matched_wrapper.get_object(idx or 0)
+        for est_name in matched_obj.get_estimate_names():
+            label = f"{matched_ds.name}/{est_name}"
+            if label not in combined_estimate_names:
+                combined_estimate_names.append(label)
 
         for i, assoc in enumerate(assocs):
             comp = provider.dataset.get_row(assoc.component_dataset_id)
@@ -357,11 +367,11 @@ def update_spectrum_and_colors(idx, dataset_id, prev_estimates):
                     )
                 )
 
-            # Gather estimate names
+            # Gather component estimate names
             for est_name in obj.get_estimate_names():
                 label = f"{comp.name}/{est_name}"
-                if label not in all_estimate_names:
-                    all_estimate_names.append(label)
+                if label not in component_estimate_names:
+                    component_estimate_names.append(label)
 
         spectrum_fig.update_layout(
             xaxis_title="Wavelength (nm)",
@@ -378,12 +388,14 @@ def update_spectrum_and_colors(idx, dataset_id, prev_estimates):
             margin=dict(t=10, b=40, l=50, r=10),
         )
 
-        # Estimate options
+        # Estimate options: combined first, then components
+        all_estimate_names = combined_estimate_names + component_estimate_names
         est_opts = [{"label": n, "value": n} for n in all_estimate_names]
         if prev_estimates:
             est_values = [e for e in prev_estimates if e in all_estimate_names]
         else:
-            est_values = all_estimate_names
+            # Default: only combined dataset estimates enabled
+            est_values = combined_estimate_names
 
         return spectrum_fig, color_fig, est_opts, est_values
 
@@ -413,6 +425,32 @@ def update_redshift(selected_estimates, zrange, idx, dataset_id):
         fig = go.Figure()
         color_idx = 0
 
+        # Combined (matched) dataset estimates
+        matched_ds = provider.dataset.get_row(dataset_id)
+        matched_wrapper = _get_component_wrapper(dataset_id, provider)
+        matched_obj = matched_wrapper.get_object(idx or 0)
+        matched_estimates = matched_obj.get_redshift_estimates()
+
+        for est_name, ensemble in matched_estimates.items():
+            label = f"{matched_ds.name}/{est_name}"
+            if selected_estimates and label not in selected_estimates:
+                continue
+            try:
+                pdf_vals = np.squeeze(ensemble.pdf(zgrid))
+                fig.add_trace(
+                    go.Scatter(
+                        x=zgrid.tolist(),
+                        y=pdf_vals.tolist(),
+                        mode="lines",
+                        name=label,
+                        line=dict(color=palette[color_idx % len(palette)]),
+                    )
+                )
+                color_idx += 1
+            except Exception:
+                pass
+
+        # Component dataset estimates
         for assoc in assocs:
             comp = provider.dataset.get_row(assoc.component_dataset_id)
             wrapper = _get_component_wrapper(comp.id_, provider)
