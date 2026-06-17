@@ -1,6 +1,5 @@
 """Tests for CRUD base module: serialization, detail content, config, filter logic."""
 
-
 from dash import html
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -133,8 +132,7 @@ class TestFilterLogic:
             return all_data
         query = filter_text.lower()
         return [
-            row for row in all_data
-            if any(query in str(v).lower() for v in row.values() if v is not None)
+            row for row in all_data if any(query in str(v).lower() for v in row.values() if v is not None)
         ]
 
     def test_empty_data_returns_empty(self):

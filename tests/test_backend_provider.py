@@ -3,7 +3,6 @@
 import os
 from unittest.mock import patch
 
-
 from live_rail.backend import BackendMode, BackendProvider, BackendSettings
 
 
@@ -82,7 +81,7 @@ class TestBackendProviderIsLocal:
 
 
 class TestBackendProviderInitialize:
-    @patch("rail_svc.db.session.init_db")
+    @patch("live_rail.backend.provider.init_db")
     def test_local_sets_env_and_calls_init_db(self, mock_init_db, local_settings):
         provider = BackendProvider.get()
         provider.configure(local_settings)
@@ -101,7 +100,7 @@ class TestBackendProviderInitialize:
         assert os.environ.get("PZ_RAIL_TOKEN") == "test-token"
         assert provider._initialized is True
 
-    @patch("rail_svc.db.session.init_db")
+    @patch("live_rail.backend.provider.init_db")
     @patch("rail.utils.catalog_utils.load_yaml")
     def test_catalog_yaml_loaded(self, mock_load_yaml, mock_init_db):
         settings = BackendSettings(
@@ -114,7 +113,7 @@ class TestBackendProviderInitialize:
 
         mock_load_yaml.assert_called_once_with("/path/catalog.yaml")
 
-    @patch("rail_svc.db.session.init_db")
+    @patch("live_rail.backend.provider.init_db")
     def test_no_catalog_yaml_skips_load(self, mock_init_db, local_settings):
         provider = BackendProvider.get()
         provider.configure(local_settings)
@@ -124,7 +123,7 @@ class TestBackendProviderInitialize:
 
 
 class TestBackendProviderEntityAccess:
-    @patch("rail_svc.db.session.init_db")
+    @patch("live_rail.backend.provider.init_db")
     def test_algorithm_local(self, mock_init_db, local_settings):
         provider = BackendProvider.get()
         provider.configure(local_settings)
@@ -142,7 +141,7 @@ class TestBackendProviderEntityAccess:
         result = provider.algorithm
         assert result is not None
 
-    @patch("rail_svc.db.session.init_db")
+    @patch("live_rail.backend.provider.init_db")
     def test_get_ops_by_name(self, mock_init_db, local_settings):
         provider = BackendProvider.get()
         provider.configure(local_settings)
@@ -151,7 +150,7 @@ class TestBackendProviderEntityAccess:
         result = provider.get_ops("dataset")
         assert result is not None
 
-    @patch("rail_svc.db.session.init_db")
+    @patch("live_rail.backend.provider.init_db")
     def test_ensure_initialized_calls_init(self, mock_init_db, local_settings):
         provider = BackendProvider.get()
         provider.configure(local_settings)
@@ -162,7 +161,7 @@ class TestBackendProviderEntityAccess:
         assert provider._initialized
         mock_init_db.assert_called_once()
 
-    @patch("rail_svc.db.session.init_db")
+    @patch("live_rail.backend.provider.init_db")
     def test_is_local_dispatches_correctly(self, mock_init_db, local_settings):
         provider = BackendProvider.get()
         provider.configure(local_settings)

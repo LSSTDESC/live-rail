@@ -1,7 +1,7 @@
 """Home / landing page."""
 
 import dash
-from dash import html, callback, Input, Output
+from dash import Input, Output, callback, html
 
 from live_rail.backend import BackendProvider
 
@@ -36,9 +36,7 @@ def update_status(settings_data):
 
     try:
         count = provider.algorithm.count_rows()
-        connection_status = html.Span(
-            f"Connected ({count} algorithms)", style={"color": "green"}
-        )
+        connection_status = html.Span(f"Connected ({count} algorithms)", style={"color": "green"})
     except Exception as e:
         connection_status = html.Span(f"Error: {e}", style={"color": "red"})
 

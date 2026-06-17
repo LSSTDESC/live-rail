@@ -109,5 +109,6 @@ def dash_app():
         provider.is_local = True
         mock_get.return_value = provider
         from live_rail.dashboard import create_app
+
         app = create_app()
         return app

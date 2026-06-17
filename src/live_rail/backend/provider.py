@@ -7,6 +7,9 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
+from rail_svc import local_sync, remote_sync
+from rail_svc.db.session import init_db
+
 
 class BackendMode(str, Enum):
     LOCAL = "local"
@@ -56,7 +59,6 @@ class BackendProvider:
     def initialize(self) -> None:
         if self._settings.mode == BackendMode.LOCAL:
             os.environ["DB__URL"] = self._settings.db_url
-            from rail_svc.db.session import init_db
             init_db()
         else:
             os.environ["PZ_RAIL_SERVICE"] = self._settings.server_url
@@ -65,6 +67,7 @@ class BackendProvider:
 
         if self._settings.catalog_yaml:
             from rail.utils import catalog_utils
+
             catalog_utils.load_yaml(self._settings.catalog_yaml)
 
         self._initialized = True
@@ -77,90 +80,70 @@ class BackendProvider:
     def algorithm(self) -> Any:
         self._ensure_initialized()
         if self.is_local:
-            from rail_svc import local_sync
             return local_sync.algorithm
-        from rail_svc import remote_sync
         return remote_sync.algorithm()
 
     @property
     def band(self) -> Any:
         self._ensure_initialized()
         if self.is_local:
-            from rail_svc import local_sync
             return local_sync.band
-        from rail_svc import remote_sync
         return remote_sync.band()
 
     @property
     def catalog_tag(self) -> Any:
         self._ensure_initialized()
         if self.is_local:
-            from rail_svc import local_sync
             return local_sync.catalog_tag
-        from rail_svc import remote_sync
         return remote_sync.catalog_tag()
 
     @property
     def catalog_band_assoc(self) -> Any:
         self._ensure_initialized()
         if self.is_local:
-            from rail_svc import local_sync
             return local_sync.catalog_band_assoc
-        from rail_svc import remote_sync
         return remote_sync.catalog_band_assoc()
 
     @property
     def dataset(self) -> Any:
         self._ensure_initialized()
         if self.is_local:
-            from rail_svc import local_sync
             return local_sync.dataset
-        from rail_svc import remote_sync
         return remote_sync.dataset()
 
     @property
     def dataset_assoc(self) -> Any:
         self._ensure_initialized()
         if self.is_local:
-            from rail_svc import local_sync
             return local_sync.dataset_assoc
-        from rail_svc import remote_sync
         return remote_sync.dataset_assoc()
 
     @property
     def estimates(self) -> Any:
         self._ensure_initialized()
         if self.is_local:
-            from rail_svc import local_sync
             return local_sync.estimates
-        from rail_svc import remote_sync
         return remote_sync.estimates()
 
     @property
     def estimator(self) -> Any:
         self._ensure_initialized()
         if self.is_local:
-            from rail_svc import local_sync
             return local_sync.estimator
-        from rail_svc import remote_sync
         return remote_sync.estimator()
 
     @property
     def model(self) -> Any:
         self._ensure_initialized()
         if self.is_local:
-            from rail_svc import local_sync
             return local_sync.model
-        from rail_svc import remote_sync
         return remote_sync.model()
 
     @property
     def funcs(self) -> Any:
         self._ensure_initialized()
         if self.is_local:
-            from rail_svc import local_sync
             return local_sync.funcs
-        from rail_svc import remote_sync
         return remote_sync.funcs()
 
     def get_ops(self, entity_name: str) -> Any:

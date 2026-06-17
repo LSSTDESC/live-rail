@@ -18,8 +18,13 @@ def build_filter_bar(prefix: str) -> html.Div:
                 type="text",
                 placeholder="Filter rows...",
                 debounce=True,
-                style={"width": "250px", "padding": "6px 10px", "fontSize": "13px",
-                       "border": "1px solid #ccc", "borderRadius": "4px"},
+                style={
+                    "width": "250px",
+                    "padding": "6px 10px",
+                    "fontSize": "13px",
+                    "border": "1px solid #ccc",
+                    "borderRadius": "4px",
+                },
             ),
         ],
         style={"marginBottom": "10px"},
@@ -62,9 +67,15 @@ def build_detail_modal(prefix: str) -> html.Div:
                         [
                             html.H4(id=f"{prefix}-detail-title"),
                             html.Button(
-                                "X", id=f"{prefix}-detail-close",
-                                style={"float": "right", "border": "none", "fontSize": "18px",
-                                       "cursor": "pointer", "background": "none"},
+                                "X",
+                                id=f"{prefix}-detail-close",
+                                style={
+                                    "float": "right",
+                                    "border": "none",
+                                    "fontSize": "18px",
+                                    "cursor": "pointer",
+                                    "background": "none",
+                                },
                             ),
                         ],
                         style={"display": "flex", "justifyContent": "space-between", "alignItems": "center"},
@@ -88,7 +99,10 @@ def build_detail_modal(prefix: str) -> html.Div:
         style={
             "display": "none",
             "position": "fixed",
-            "top": 0, "left": 0, "right": 0, "bottom": 0,
+            "top": 0,
+            "left": 0,
+            "right": 0,
+            "bottom": 0,
             "backgroundColor": "rgba(0,0,0,0.5)",
             "zIndex": 1000,
         },
@@ -120,9 +134,7 @@ def build_form_fields(
                 value=["true"] if field_info.default else [],
             )
         elif annotation is int:
-            input_el = dcc.Input(
-                id=field_id, type="number", placeholder=description
-            )
+            input_el = dcc.Input(id=field_id, type="number", placeholder=description)
         elif annotation is dict or str(annotation).startswith("dict"):
             input_el = dcc.Textarea(
                 id=field_id,
@@ -131,7 +143,9 @@ def build_form_fields(
             )
         else:
             input_el = dcc.Input(
-                id=field_id, type="text", placeholder=description,
+                id=field_id,
+                type="text",
+                placeholder=description,
                 style={"width": "100%"},
             )
 
@@ -168,7 +182,8 @@ def build_create_modal(
                         [
                             html.H4(f"Create {entity_name.replace('_', ' ').title()}"),
                             html.Button(
-                                "X", id=f"{prefix}-modal-close",
+                                "X",
+                                id=f"{prefix}-modal-close",
                                 style={"float": "right", "border": "none", "fontSize": "18px"},
                             ),
                         ],
@@ -178,8 +193,15 @@ def build_create_modal(
                     *form_fields,
                     html.Hr(),
                     html.Button(
-                        "Create", id=f"{prefix}-create-submit",
-                        style={"padding": "8px 24px", "backgroundColor": "#007bff", "color": "white", "border": "none", "borderRadius": "4px"},
+                        "Create",
+                        id=f"{prefix}-create-submit",
+                        style={
+                            "padding": "8px 24px",
+                            "backgroundColor": "#007bff",
+                            "color": "white",
+                            "border": "none",
+                            "borderRadius": "4px",
+                        },
                     ),
                     html.Div(id=f"{prefix}-create-status", style={"marginTop": "8px"}),
                 ],
@@ -197,7 +219,10 @@ def build_create_modal(
         style={
             "display": "none",
             "position": "fixed",
-            "top": 0, "left": 0, "right": 0, "bottom": 0,
+            "top": 0,
+            "left": 0,
+            "right": 0,
+            "bottom": 0,
             "backgroundColor": "rgba(0,0,0,0.5)",
             "zIndex": 1000,
         },
@@ -209,23 +234,54 @@ def build_action_bar(entity_name: str, has_load: bool = False) -> html.Div:
     prefix = entity_name
     buttons = [
         html.Button(
-            "Refresh", id=f"{prefix}-refresh-btn", n_clicks=0,
+            "Refresh",
+            id=f"{prefix}-refresh-btn",
+            n_clicks=0,
             style={"padding": "6px 16px", "marginRight": "8px"},
         ),
         html.Button(
-            "+ Create", id=f"{prefix}-create-btn", n_clicks=0,
-            style={"padding": "6px 16px", "marginRight": "8px", "backgroundColor": "#28a745", "color": "white", "border": "none", "borderRadius": "4px"},
+            "+ Create",
+            id=f"{prefix}-create-btn",
+            n_clicks=0,
+            style={
+                "padding": "6px 16px",
+                "marginRight": "8px",
+                "backgroundColor": "#28a745",
+                "color": "white",
+                "border": "none",
+                "borderRadius": "4px",
+            },
         ),
         html.Button(
-            "Delete Selected", id=f"{prefix}-delete-btn", n_clicks=0,
-            style={"padding": "6px 16px", "backgroundColor": "#dc3545", "color": "white", "border": "none", "borderRadius": "4px"},
+            "Delete Selected",
+            id=f"{prefix}-delete-btn",
+            n_clicks=0,
+            style={
+                "padding": "6px 16px",
+                "backgroundColor": "#dc3545",
+                "color": "white",
+                "border": "none",
+                "borderRadius": "4px",
+            },
         ),
     ]
 
     if has_load:
-        buttons.insert(2, html.Button(
-            "Load", id=f"{prefix}-load-btn", n_clicks=0,
-            style={"padding": "6px 16px", "marginRight": "8px", "backgroundColor": "#17a2b8", "color": "white", "border": "none", "borderRadius": "4px"},
-        ))
+        buttons.insert(
+            2,
+            html.Button(
+                "Load",
+                id=f"{prefix}-load-btn",
+                n_clicks=0,
+                style={
+                    "padding": "6px 16px",
+                    "marginRight": "8px",
+                    "backgroundColor": "#17a2b8",
+                    "color": "white",
+                    "border": "none",
+                    "borderRadius": "4px",
+                },
+            ),
+        )
 
     return html.Div(buttons, style={"marginBottom": "12px"})

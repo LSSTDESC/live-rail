@@ -1,6 +1,6 @@
 [project]
 name = "live-rail"
-description = "Live demonstrations for RAIL"
+description = "Unified dashboard for RAIL photometric redshift estimation"
 readme = "README.md"
 requires-python = ">=3.13"
 license = { file = "LICENSE" }
@@ -16,42 +16,39 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.13",
     "Natural Language :: English",
-    "Operating System :: POSIX"
+    "Operating System :: POSIX",
 ]
 
 dynamic = ["version"]
 dependencies = [
     "pz-rail-base>=2.0",
-    "matplotlib",
     "plotly",
     "click",
-    "dash",
-    "jupyter",
-    "jupyter-dash",
+    "dash[ag-grid]",
+    "pz-rail-svc[all]",
     "qp-prob[full]",
 ]
 
-# On a mac, install optional dependencies with `pip install '.[dev]'` (include the single quotes)
 [project.optional-dependencies]
 
 dev = [
     "coverage",
     "pytest",
+    "pytest-cov",
     "ruff",
     "mypy",
-    "pytest-cov", # Used to report total code coverage
-    "pre-commit", # Used to run checks before finalizing a git commit
-    "pylint", # Used for static linting of files
+    "pylint",
+    "pre-commit",
 ]
 
 docs = [
     "nbsphinx",
-    "sphinx", # Used to automatically generate documentation
-    "sphinx-autodoc-typehints", 
-    "sphinx_rtd_theme", # Used to render documentation
-    "sphinx-autoapi", # Used to automatically generate api documentation    
-    "sphinx-tabs", # Used to create tabbed content within the docs
-    "sphinx-click", # Used for command line interface docs
+    "sphinx",
+    "sphinx-autodoc-typehints",
+    "sphinx_rtd_theme",
+    "sphinx-autoapi",
+    "sphinx-tabs",
+    "sphinx-click",
 ]
 
 [project.scripts]
@@ -65,38 +62,21 @@ build-backend = "setuptools.build_meta"
 write_to = "src/live_rail/_version.py"
 
 [tool.pytest.ini_options]
-testpaths = [
-    "tests",
-]
+testpaths = ["tests"]
 addopts = [
     "--cov=src/live_rail",
-    "--cov-report=html"
+    "--cov-report=html",
+    "-m", "not integration",
+]
+markers = [
+    "integration: tests that require the real database and data files",
 ]
 
-[tool.pylint]
-disable = [
-    "abstract-method",
-    "invalid-name",
-    "too-many-lines",
-    "too-many-statements",
-    "too-many-instance-attributes",
-    "too-many-positional-arguments",
-    "too-many-nested-blocks",
-    "missing-module-docstring",
-    "missing-class-docstring",
-    "missing-function-docstring",
-    "too-few-public-methods",
-    "duplicate-code",
-    "use-dict-literal",
-    "broad-exception-caught",
-]
-generated-members = ["add", "multiply", "subtract", "divide", "sqrt", "floor", "atan2"]
-max-line-length = 110
-max-locals = 50
-max-branches = 25
-max-public-methods = 50
-max-args = 7
+[tool.ruff]
+line-length = 110
 
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
 
 [tool.mypy]
 disallow_untyped_defs = false
@@ -116,15 +96,15 @@ module = "live_rail.wrappers.rail_svc_wrapper"
 disable_error_code = ["attr-defined"]
 
 [tool.coverage.run]
-omit = [
-     "*/_version.py",
-     ]
+omit = ["*/_version.py"]
 
 [tool.coverage.report]
 exclude_also = [
     "raise NotImplementedError",
     "__repr__",
     "TYPE_CHECKING",
-    "if cls._instance is None:",
-    "except KeyError as missing_key:",
-    ]
+]
+
+[tool.pylint.'MESSAGES CONTROL']
+max-line-length = 120
+disable = "C0415, E1101, W0231, W0233, W0237, W0612, W0613, W0718, W1203, W1510, C0115, C0116, C0114, C0103, C0302, R0902, R0903, R0912, R0913, R0917, R0914, R0915, R0801, R0904, R1705, R1735"

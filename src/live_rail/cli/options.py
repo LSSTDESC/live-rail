@@ -4,10 +4,10 @@ from typing import Any
 import click
 
 __all__ = [
-    'port',
-    'debug',
-    'data_path',
-    'pz_estimate_path',
+    "port",
+    "debug",
+    "data_path",
+    "pz_estimate_path",
     "pz_estimates_yaml",
 ]
 
@@ -26,12 +26,11 @@ class PartialArgument:
     """Wraps click.argument with partial arguments for convenient reuse"""
 
     def __init__(self, *param_decls: Any, **kwargs: Any) -> None:
-        self._partial = partial(
-            click.argument, *param_decls, cls=click.Argument, **kwargs
-        )
+        self._partial = partial(click.argument, *param_decls, cls=click.Argument, **kwargs)
 
     def __call__(self, *args: Any, **kwargs: Any) -> Any:  # pragma: no cover
         return self._partial(*args, **kwargs)
+
 
 debug = PartialOption(
     "--debug",
@@ -39,7 +38,7 @@ debug = PartialOption(
     default=False,
     is_flag=True,
 )
-    
+
 port = PartialOption(
     "--port",
     help="Server port",

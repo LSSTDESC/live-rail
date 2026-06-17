@@ -6,12 +6,17 @@ import json
 from dataclasses import dataclass, field
 from typing import Any
 
-from dash import Input, Output, State, callback, dcc, html, no_update
+from dash import Input, Output, State, callback, ctx, dcc, html, no_update
 from pydantic import BaseModel
 
 from live_rail.backend import BackendProvider
-
-from live_rail.dashboard.pages.crud._components import build_action_bar, build_create_modal, build_data_table, build_detail_modal, build_filter_bar
+from live_rail.dashboard.pages.crud._components import (
+    build_action_bar,
+    build_create_modal,
+    build_data_table,
+    build_detail_modal,
+    build_filter_bar,
+)
 
 
 def _serialize_value(val: Any) -> Any:
@@ -23,7 +28,6 @@ def _serialize_value(val: Any) -> Any:
 
 def _build_detail_content(row: Any) -> html.Div:
     """Build a formatted display of all fields on a pydantic model instance."""
-    from dash import html
     items = []
     for field_name in type(row).model_fields:
         value = getattr(row, field_name, None)
@@ -33,8 +37,13 @@ def _build_detail_content(row: Any) -> html.Div:
                 [
                     html.Span(
                         field_name,
-                        style={"fontWeight": "600", "width": "160px", "display": "inline-block",
-                               "color": "#555", "fontSize": "13px"},
+                        style={
+                            "fontWeight": "600",
+                            "width": "160px",
+                            "display": "inline-block",
+                            "color": "#555",
+                            "fontSize": "13px",
+                        },
                     ),
                     html.Span(
                         display_val,
@@ -127,8 +136,7 @@ def register_crud_callbacks(config: CrudPageConfig) -> None:
             return all_data
         query = filter_text.lower()
         return [
-            row for row in all_data
-            if any(query in str(v).lower() for v in row.values() if v is not None)
+            row for row in all_data if any(query in str(v).lower() for v in row.values() if v is not None)
         ]
 
     # Show detail modal when a clickable cell is clicked
@@ -143,7 +151,6 @@ def register_crud_callbacks(config: CrudPageConfig) -> None:
         prevent_initial_call=True,
     )
     def show_detail(cell_clicked, close_clicks, row_data_list, modal_style):
-        from dash import ctx
 
         triggered_prop = ctx.triggered[0]["prop_id"] if ctx.triggered else ""
         if "detail-close" in triggered_prop:
@@ -199,7 +206,6 @@ def register_crud_callbacks(config: CrudPageConfig) -> None:
         prevent_initial_call=True,
     )
     def toggle_modal(open_clicks, close_clicks, current_style):
-        from dash import ctx
         if ctx.triggered_id == f"{prefix}-create-btn":
             return {**current_style, "display": "block"}
         return {**current_style, "display": "none"}

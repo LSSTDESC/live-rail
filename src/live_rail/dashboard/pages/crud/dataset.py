@@ -28,18 +28,29 @@ def layout(**kwargs):
                 id="dataset-viz-single-btn",
                 n_clicks=0,
                 disabled=True,
-                style={"padding": "6px 16px", "marginRight": "8px",
-                       "backgroundColor": "#6f42c1", "color": "white",
-                       "border": "none", "borderRadius": "4px", "opacity": "0.5"},
+                style={
+                    "padding": "6px 16px",
+                    "marginRight": "8px",
+                    "backgroundColor": "#6f42c1",
+                    "color": "white",
+                    "border": "none",
+                    "borderRadius": "4px",
+                    "opacity": "0.5",
+                },
             ),
             html.Button(
                 "Visualize Multi",
                 id="dataset-viz-multi-btn",
                 n_clicks=0,
                 disabled=True,
-                style={"padding": "6px 16px",
-                       "backgroundColor": "#20c997", "color": "white",
-                       "border": "none", "borderRadius": "4px", "opacity": "0.5"},
+                style={
+                    "padding": "6px 16px",
+                    "backgroundColor": "#20c997",
+                    "color": "white",
+                    "border": "none",
+                    "borderRadius": "4px",
+                    "opacity": "0.5",
+                },
             ),
             dcc.Location(id="dataset-viz-redirect", refresh=True),
         ],
@@ -60,16 +71,29 @@ register_crud_callbacks(config)
     Input("dataset-table", "selectedRows"),
 )
 def update_viz_buttons(selected_rows):
-    single_base = {"padding": "6px 16px", "marginRight": "8px",
-                   "backgroundColor": "#6f42c1", "color": "white",
-                   "border": "none", "borderRadius": "4px"}
-    multi_base = {"padding": "6px 16px",
-                  "backgroundColor": "#20c997", "color": "white",
-                  "border": "none", "borderRadius": "4px"}
+    single_base = {
+        "padding": "6px 16px",
+        "marginRight": "8px",
+        "backgroundColor": "#6f42c1",
+        "color": "white",
+        "border": "none",
+        "borderRadius": "4px",
+    }
+    multi_base = {
+        "padding": "6px 16px",
+        "backgroundColor": "#20c997",
+        "color": "white",
+        "border": "none",
+        "borderRadius": "4px",
+    }
 
     if not selected_rows:
-        return True, {**single_base, "opacity": "0.5", "cursor": "not-allowed"}, \
-               True, {**multi_base, "opacity": "0.5", "cursor": "not-allowed"}
+        return (
+            True,
+            {**single_base, "opacity": "0.5", "cursor": "not-allowed"},
+            True,
+            {**multi_base, "opacity": "0.5", "cursor": "not-allowed"},
+        )
 
     row_data = selected_rows[0]
     is_collection = row_data.get("is_collection")

@@ -1,8 +1,7 @@
 """Settings page for backend configuration."""
 
-
 import dash
-from dash import html, dcc, callback, Input, Output, State
+from dash import Input, Output, State, callback, dcc, html
 
 from live_rail.backend import BackendMode, BackendProvider, BackendSettings
 

@@ -2,9 +2,9 @@
 
 from unittest.mock import MagicMock, patch
 
-from live_rail.dashboard import create_app
-
 import dash
+
+from live_rail.dashboard import create_app
 
 
 class TestCreateApp:

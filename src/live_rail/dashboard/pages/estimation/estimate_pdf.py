@@ -89,10 +89,14 @@ def run_estimate(n_clicks, estimator_id, dataset_id, row):
             pdf_values = np.squeeze(pdf_all)
 
         fig = go.Figure()
-        fig.add_trace(go.Scatter(
-            x=zgrid.tolist(), y=pdf_values.tolist(),
-            mode="lines", name="p(z)",
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=zgrid.tolist(),
+                y=pdf_values.tolist(),
+                mode="lines",
+                name="p(z)",
+            )
+        )
         fig.update_layout(
             xaxis_title="Redshift",
             yaxis_title="p(z)",

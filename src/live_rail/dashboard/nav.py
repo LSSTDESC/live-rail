@@ -1,7 +1,6 @@
 """Sidebar navigation component."""
 
-from dash import html, dcc
-
+from dash import dcc, html
 
 SIDEBAR_STYLE = {
     "width": "220px",

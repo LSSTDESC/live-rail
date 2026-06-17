@@ -2,6 +2,8 @@ from importlib.metadata import version as _pkg_version
 
 import click
 
+from live_rail.app import main
+
 from . import options
 
 __version__ = _pkg_version("live-rail")
@@ -31,7 +33,13 @@ def dashboard(
     catalog_yaml: str | None,
 ) -> int:
     """Launch the unified RAIL dashboard."""
-    from live_rail.app import main
-    main(port=port, debug=debug, backend=backend, db_url=db_url, server_url=server_url,
-         token=token, catalog_yaml=catalog_yaml)
+    main(
+        port=port,
+        debug=debug,
+        backend=backend,
+        db_url=db_url,
+        server_url=server_url,
+        token=token,
+        catalog_yaml=catalog_yaml,
+    )
     return 0

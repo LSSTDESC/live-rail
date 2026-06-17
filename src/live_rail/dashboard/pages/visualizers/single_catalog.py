@@ -10,6 +10,7 @@ import plotly.graph_objs as go
 from dash import Input, Output, State, callback, dcc, html, no_update
 
 from live_rail.backend import BackendProvider
+from live_rail.wrappers.rail_svc_wrapper import RailSvcLocalCatalogWrapper, RailSvcRemoteCatalogWrapper
 
 dash.register_page(__name__, path="/visualize/single", name="Single Catalog")
 
@@ -25,8 +26,9 @@ def layout(dataset_id=None, **kwargs):
             html.Div(
                 [
                     html.Label("Dataset"),
-                    dcc.Dropdown(id="viz-s-dataset", placeholder="Select dataset...",
-                                 value=initial_dataset_id),
+                    dcc.Dropdown(
+                        id="viz-s-dataset", placeholder="Select dataset...", value=initial_dataset_id
+                    ),
                     html.Button(
                         "Load",
                         id="viz-s-load-btn",
@@ -42,76 +44,125 @@ def layout(dataset_id=None, **kwargs):
             dcc.Store(id="viz-s-dataset-id", data=None),
             dcc.Store(id="viz-s-n-objects", data=0),
             # Main visualizer container (hidden until loaded)
-            html.Div(id="viz-s-container", style={"display": "none"}, children=[
-                # Object selection
-                html.Div(
-                    [
-                        html.Button("< Back", id="viz-s-back-btn", n_clicks=0,
-                                    style={"padding": "6px 12px", "marginRight": "12px"}),
-                        html.Div(
-                            [
-                                dcc.Slider(id="viz-s-slider", min=0, max=1, value=0, step=1,
-                                           tooltip={"placement": "bottom"}),
-                            ],
-                            style={"flex": "1", "minWidth": "200px"},
-                        ),
-                        html.Button("Next >", id="viz-s-next-btn", n_clicks=0,
-                                    style={"padding": "6px 12px", "marginLeft": "12px"}),
-                        html.Span(id="viz-s-counter", style={"marginLeft": "12px", "fontWeight": "bold"}),
-                    ],
-                    style={"display": "flex", "alignItems": "center", "marginBottom": "16px",
-                           "padding": "12px", "backgroundColor": "#fafafa", "borderRadius": "4px"},
-                ),
-                # Plots row
-                html.Div(
-                    [
-                        # Spectrum
-                        html.Div(
-                            [
-                                html.H4("Photometric Spectrum"),
-                                dcc.Graph(id="viz-s-spectrum", config={"responsive": True},
-                                          style={"height": "300px"}),
-                            ],
-                            style={"flex": "1", "padding": "8px"},
-                        ),
-                        # Color-Color
-                        html.Div(
-                            [
-                                html.H4("Color-Color Diagram"),
-                                dcc.Graph(id="viz-s-colorcolor", config={"responsive": True},
-                                          style={"height": "300px"}),
-                            ],
-                            style={"flex": "1", "padding": "8px"},
-                        ),
-                    ],
-                    style={"display": "flex", "gap": "8px"},
-                ),
-                # Redshift PDFs
-                html.Div(
-                    [
-                        html.H4("Redshift Estimates"),
-                        html.Div([
-                            html.Label("Estimates:"),
-                            dcc.Checklist(id="viz-s-estimate-checks", inline=True,
-                                          style={"marginLeft": "8px"}),
-                        ], style={"display": "flex", "alignItems": "center", "marginBottom": "8px",
-                                  "flexWrap": "wrap"}),
-                        html.Div([
-                            html.Label("z range:"),
-                            dcc.RangeSlider(id="viz-s-zrange", min=0, max=5, value=[0, 3],
-                                            step=0.1, marks={i: str(i) for i in range(6)}),
-                        ], style={"maxWidth": "400px", "marginBottom": "8px"}),
-                        dcc.Graph(id="viz-s-redshift", config={"responsive": True},
-                                  style={"height": "350px"}),
-                    ],
-                    style={"padding": "8px", "marginTop": "8px"},
-                ),
-            ]),
+            html.Div(
+                id="viz-s-container",
+                style={"display": "none"},
+                children=[
+                    # Object selection
+                    html.Div(
+                        [
+                            html.Button(
+                                "< Back",
+                                id="viz-s-back-btn",
+                                n_clicks=0,
+                                style={"padding": "6px 12px", "marginRight": "12px"},
+                            ),
+                            html.Div(
+                                [
+                                    dcc.Slider(
+                                        id="viz-s-slider",
+                                        min=0,
+                                        max=1,
+                                        value=0,
+                                        step=1,
+                                        tooltip={"placement": "bottom"},
+                                    ),
+                                ],
+                                style={"flex": "1", "minWidth": "200px"},
+                            ),
+                            html.Button(
+                                "Next >",
+                                id="viz-s-next-btn",
+                                n_clicks=0,
+                                style={"padding": "6px 12px", "marginLeft": "12px"},
+                            ),
+                            html.Span(id="viz-s-counter", style={"marginLeft": "12px", "fontWeight": "bold"}),
+                        ],
+                        style={
+                            "display": "flex",
+                            "alignItems": "center",
+                            "marginBottom": "16px",
+                            "padding": "12px",
+                            "backgroundColor": "#fafafa",
+                            "borderRadius": "4px",
+                        },
+                    ),
+                    # Plots row
+                    html.Div(
+                        [
+                            # Spectrum
+                            html.Div(
+                                [
+                                    html.H4("Photometric Spectrum"),
+                                    dcc.Graph(
+                                        id="viz-s-spectrum",
+                                        config={"responsive": True},
+                                        style={"height": "300px"},
+                                    ),
+                                ],
+                                style={"flex": "1", "padding": "8px"},
+                            ),
+                            # Color-Color
+                            html.Div(
+                                [
+                                    html.H4("Color-Color Diagram"),
+                                    dcc.Graph(
+                                        id="viz-s-colorcolor",
+                                        config={"responsive": True},
+                                        style={"height": "300px"},
+                                    ),
+                                ],
+                                style={"flex": "1", "padding": "8px"},
+                            ),
+                        ],
+                        style={"display": "flex", "gap": "8px"},
+                    ),
+                    # Redshift PDFs
+                    html.Div(
+                        [
+                            html.H4("Redshift Estimates"),
+                            html.Div(
+                                [
+                                    html.Label("Estimates:"),
+                                    dcc.Checklist(
+                                        id="viz-s-estimate-checks", inline=True, style={"marginLeft": "8px"}
+                                    ),
+                                ],
+                                style={
+                                    "display": "flex",
+                                    "alignItems": "center",
+                                    "marginBottom": "8px",
+                                    "flexWrap": "wrap",
+                                },
+                            ),
+                            html.Div(
+                                [
+                                    html.Label("z range:"),
+                                    dcc.RangeSlider(
+                                        id="viz-s-zrange",
+                                        min=0,
+                                        max=5,
+                                        value=[0, 3],
+                                        step=0.1,
+                                        marks={i: str(i) for i in range(6)},
+                                    ),
+                                ],
+                                style={"maxWidth": "400px", "marginBottom": "8px"},
+                            ),
+                            dcc.Graph(
+                                id="viz-s-redshift", config={"responsive": True}, style={"height": "350px"}
+                            ),
+                        ],
+                        style={"padding": "8px", "marginTop": "8px"},
+                    ),
+                ],
+            ),
         ]
     )
 
 
 # --- Callbacks ---
+
 
 @callback(
     Output("viz-s-dataset", "options"),
@@ -196,10 +247,8 @@ def _get_wrapper(dataset_id, provider):
         return _wrapper_cache[dataset_id]
 
     if provider.is_local:
-        from live_rail.wrappers.rail_svc_wrapper import RailSvcLocalCatalogWrapper
         wrapper = RailSvcLocalCatalogWrapper(dataset_id)
     else:
-        from live_rail.wrappers.rail_svc_wrapper import RailSvcRemoteCatalogWrapper
         wrapper = RailSvcRemoteCatalogWrapper(dataset_id)
 
     _wrapper_cache[dataset_id] = wrapper
@@ -232,17 +281,22 @@ def update_on_object_change(idx, dataset_id, prev_estimates):
         mag_errs = spec["mag_errors"]
 
         spectrum_fig = go.Figure()
-        spectrum_fig.add_trace(go.Scatter(
-            x=midpoints.tolist(), y=mags.tolist(),
-            mode="markers+lines",
-            error_y=dict(type="data", array=mag_errs.tolist(), visible=True),
-            name="Magnitudes",
-            text=band_names,
-            hovertemplate="%{text}<br>%{y:.2f} mag<extra></extra>",
-        ))
+        spectrum_fig.add_trace(
+            go.Scatter(
+                x=midpoints.tolist(),
+                y=mags.tolist(),
+                mode="markers+lines",
+                error_y=dict(type="data", array=mag_errs.tolist(), visible=True),
+                name="Magnitudes",
+                text=band_names,
+                hovertemplate="%{text}<br>%{y:.2f} mag<extra></extra>",
+            )
+        )
         spectrum_fig.update_layout(
-            xaxis_title="Wavelength (nm)", yaxis_title="Magnitude",
-            yaxis_autorange="reversed", template="plotly_white",
+            xaxis_title="Wavelength (nm)",
+            yaxis_title="Magnitude",
+            yaxis_autorange="reversed",
+            template="plotly_white",
             margin=dict(t=10, b=40, l=50, r=10),
             showlegend=False,
         )
@@ -287,19 +341,21 @@ def _build_color_color_figure(color_names: list[str], color_vals: list[float]) -
         y_vals.append(y)
         labels.append(f"{color_names[i]} vs {color_names[i + 1]}")
 
-    fig.add_trace(go.Scatter(
-        x=x_vals, y=y_vals,
-        mode="markers+lines+text",
-        marker=dict(size=10, color=list(range(len(x_vals))),
-                    colorscale="Viridis", showscale=False),
-        line=dict(color="gray", width=1, dash="dot"),
-        text=[cn.split(" - ")[0] if " - " in cn else cn[:3] for cn in color_names[:-1]],
-        textposition="top center",
-        textfont=dict(size=9),
-        hovertext=labels,
-        hoverinfo="text+x+y",
-        showlegend=False,
-    ))
+    fig.add_trace(
+        go.Scatter(
+            x=x_vals,
+            y=y_vals,
+            mode="markers+lines+text",
+            marker=dict(size=10, color=list(range(len(x_vals))), colorscale="Viridis", showscale=False),
+            line=dict(color="gray", width=1, dash="dot"),
+            text=[cn.split(" - ")[0] if " - " in cn else cn[:3] for cn in color_names[:-1]],
+            textposition="top center",
+            textfont=dict(size=9),
+            hovertext=labels,
+            hoverinfo="text+x+y",
+            showlegend=False,
+        )
+    )
 
     fig.update_layout(
         xaxis=dict(title="Color[i]", range=[-1, 2]),
@@ -337,23 +393,28 @@ def update_redshift(selected_estimates, zrange, idx, dataset_id):
                 ensemble = estimates[name]
                 try:
                     pdf_vals = np.squeeze(ensemble.pdf(zgrid))
-                    fig.add_trace(go.Scatter(
-                        x=zgrid.tolist(), y=pdf_vals.tolist(),
-                        mode="lines", name=name,
-                        line=dict(color=palette[i % len(palette)]),
-                    ))
+                    fig.add_trace(
+                        go.Scatter(
+                            x=zgrid.tolist(),
+                            y=pdf_vals.tolist(),
+                            mode="lines",
+                            name=name,
+                            line=dict(color=palette[i % len(palette)]),
+                        )
+                    )
                 except Exception:
                     pass
 
         # True redshift marker
         true_z = obj.get_true_redshift()
         if true_z is not None and not np.isnan(true_z):
-            fig.add_vline(x=float(true_z), line_dash="dash", line_color="gray",
-                          annotation_text="true z")
+            fig.add_vline(x=float(true_z), line_dash="dash", line_color="gray", annotation_text="true z")
 
         fig.update_layout(
-            xaxis_title="Redshift", yaxis_title="p(z)",
-            template="plotly_white", margin=dict(t=10, b=40, l=50, r=10),
+            xaxis_title="Redshift",
+            yaxis_title="p(z)",
+            template="plotly_white",
+            margin=dict(t=10, b=40, l=50, r=10),
         )
         return fig
     except Exception:
