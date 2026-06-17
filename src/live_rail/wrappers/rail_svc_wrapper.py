@@ -61,14 +61,14 @@ class RailSvcLocalCatalogWrapper(CatalogWrapper):
     ) -> tuple[np.ndarray, np.ndarray, dict[str, qp.Ensemble], float | None, dict[str, np.ndarray]]:
         input_data, estimates = local_sync.funcs.get_data_and_estimates_data(self._dataset.id_, row)
         mag_vals = np.array(
-            [input_data[self._mag_column_map.get(band_name_)][row] for band_name_ in self._band_names]
+            [input_data[self._mag_column_map.get(band_name_)][0] for band_name_ in self._band_names]
         )
         mag_err_vals = np.array(
-            [input_data[self._mag_err_column_map.get(band_name_)][row] for band_name_ in self._band_names]
+            [input_data[self._mag_err_column_map.get(band_name_)][0] for band_name_ in self._band_names]
         )
 
         try:
-            true_redshift = float(input_data["redshift"][row])
+            true_redshift = float(input_data["redshift"][0])
         except Exception:
             true_redshift = np.nan
 
@@ -146,14 +146,14 @@ class RailSvcRemoteCatalogWrapper(CatalogWrapper):
     ) -> tuple[np.ndarray, np.ndarray, dict[str, qp.Ensemble], float | None, dict[str, np.ndarray]]:
         input_data, estimates = remote_sync.funcs.get_data_and_estimates_data(self._dataset.id_, row)
         mag_vals = np.array(
-            [input_data[self._mag_column_map.get(band_name_)][row] for band_name_ in self._band_names]
+            [input_data[self._mag_column_map.get(band_name_)][0] for band_name_ in self._band_names]
         )
         mag_err_vals = np.array(
-            [input_data[self._mag_err_column_map.get(band_name_)][row] for band_name_ in self._band_names]
+            [input_data[self._mag_err_column_map.get(band_name_)][0] for band_name_ in self._band_names]
         )
 
         try:
-            true_redshift = float(input_data["redshift"][row])
+            true_redshift = float(input_data["redshift"][0])
         except Exception:
             true_redshift = np.nan
 
