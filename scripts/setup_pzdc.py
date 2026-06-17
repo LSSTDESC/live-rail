@@ -101,7 +101,7 @@ def load():
 
 if __name__ == '__main__':
     download_data()
-    # rail_svc_utils.setup_db()
+    rail_svc_utils.setup_db()
     db.init_db()
     local_sync.funcs.load_catalog_yaml(SANDBOX_CATALOG_YAML, filter_dir=FILTER_DIR)
     load()

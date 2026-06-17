@@ -31,6 +31,8 @@ MANIFEST
 rail_svc.db
 sandbox.tgz
 archive/
+data/
+projects/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
