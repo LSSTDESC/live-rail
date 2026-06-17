@@ -91,18 +91,18 @@ class TestRailSvcLocalCatalogWrapperGetData:
         mock_ls.band.get_row.return_value = mock_band
         mock_ls.funcs.build_cat_estimator_pdf_wrappers_for_dataset.return_value = []
 
-        # get_data_and_estimates_data returns full arrays
+        # get_data_and_estimates_data returns a single-row slice for the requested row
         input_data = {
-            "mag_g": np.array([22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.0]),
-            "mag_g_err": np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]),
-            "redshift": np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]),
+            "mag_g": np.array([25.0]),
+            "mag_g_err": np.array([0.4]),
+            "redshift": np.array([0.4]),
         }
         mock_ls.funcs.get_data_and_estimates_data.return_value = (input_data, {})
 
         wrapper = RailSvcLocalCatalogWrapper(1)
         mags, errs, estimates, true_z, raw = wrapper.get_data(3)
 
-        assert mags[0] == 25.0  # row 3
+        assert mags[0] == 25.0
         assert errs[0] == 0.4
         assert true_z == pytest.approx(0.4)
 
@@ -129,10 +129,10 @@ class TestRailSvcLocalCatalogWrapperGetData:
         mock_ls.band.get_row.return_value = mock_band
         mock_ls.funcs.build_cat_estimator_pdf_wrappers_for_dataset.return_value = []
 
-        # No redshift column
+        # No redshift column — single-row slice returned by upstream
         input_data = {
-            "mag_g": np.array([22.0, 23.0, 24.0, 25.0, 26.0]),
-            "mag_g_err": np.array([0.1, 0.2, 0.3, 0.4, 0.5]),
+            "mag_g": np.array([22.0]),
+            "mag_g_err": np.array([0.1]),
         }
         mock_ls.funcs.get_data_and_estimates_data.return_value = (input_data, {})
 
