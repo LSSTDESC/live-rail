@@ -31,7 +31,7 @@ def build_filter_bar(prefix: str) -> html.Div:
     )
 
 
-def build_data_table(table_id: str, columns: list[str]) -> dag.AgGrid:
+def build_data_table(table_id: str, columns: list[str], multi_select: bool = False) -> dag.AgGrid:
     """Create a configured AG Grid for entity display."""
     clickable_cols = {c for c in columns if c == "name" or (c.endswith("_id") and c != "id_")}
 
@@ -42,13 +42,23 @@ def build_data_table(table_id: str, columns: list[str]) -> dag.AgGrid:
             col_def["cellStyle"] = {"color": "#0066cc", "cursor": "pointer", "textDecoration": "underline"}
         column_defs.append(col_def)
 
+    if multi_select:
+        row_selection = {
+            "mode": "multiRow",
+            "checkboxes": True,
+            "headerCheckbox": True,
+            "enableDeselection": True,
+        }
+    else:
+        row_selection = {"mode": "singleRow", "checkboxes": True, "enableDeselection": True}
+
     return dag.AgGrid(
         id=table_id,
         columnDefs=column_defs,
         rowData=[],
         defaultColDef={"resizable": True, "flex": 1, "minWidth": 80},
         dashGridOptions={
-            "rowSelection": {"mode": "singleRow", "checkboxes": True, "enableDeselection": True},
+            "rowSelection": row_selection,
             "pagination": True,
             "paginationPageSize": 20,
             "animateRows": True,

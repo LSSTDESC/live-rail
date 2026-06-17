@@ -77,6 +77,8 @@ class CrudPageConfig:
     table_columns: list[str]
     has_load: bool = False
     has_download: bool = False
+    multi_select: bool = False
+    extra_layout: list | None = None
     foreign_keys: dict[str, str] = field(default_factory=dict)
 
 
@@ -85,19 +87,20 @@ def make_crud_layout(config: CrudPageConfig):
     prefix = config.entity_name
 
     def layout_fn(**kwargs):
-        return html.Div(
-            [
-                html.H2(config.display_name),
-                html.Hr(),
-                build_action_bar(prefix, has_load=config.has_load),
-                html.Div(id=f"{prefix}-status", style={"marginBottom": "8px"}),
-                build_filter_bar(prefix),
-                build_data_table(f"{prefix}-table", config.table_columns),
-                build_create_modal(prefix, config.create_model, config.foreign_keys),
-                build_detail_modal(prefix),
-                dcc.Store(id=f"{prefix}-all-data", data=[]),
-            ]
-        )
+        children = [
+            html.H2(config.display_name),
+            html.Hr(),
+            build_action_bar(prefix, has_load=config.has_load),
+            html.Div(id=f"{prefix}-status", style={"marginBottom": "8px"}),
+            build_filter_bar(prefix),
+            build_data_table(f"{prefix}-table", config.table_columns, multi_select=config.multi_select),
+            build_create_modal(prefix, config.create_model, config.foreign_keys),
+            build_detail_modal(prefix),
+            dcc.Store(id=f"{prefix}-all-data", data=[]),
+        ]
+        if config.extra_layout:
+            children.extend(config.extra_layout)
+        return html.Div(children)
 
     return layout_fn
 
