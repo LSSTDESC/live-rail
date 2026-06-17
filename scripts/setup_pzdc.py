@@ -10,10 +10,10 @@ from live_rail import rail_svc_utils
 
 FILTER_DIR = Path(path_utils.RAILDIR) / 'rail/examples_data/estimation_data/data/FILTER'
 SANDBOX_CATALOG_YAML = Path(os.path.dirname(live_rail.__file__).replace('src/live_rail', 'nb')) / 'sandbox_catalogs.yaml'
-BASE_DIR = Path(os.environ.get("PZ_RAIL_DATA_DIR", '.'))
-TEST_DATA_DIR = BASE_DIR / Path('data/test/')
-MODEL_DIR = BASE_DIR / Path('projects/sandbox/data')
-ESTIMATES_DIR = BASE_DIR / Path('projects/sandbox/data')
+BASE_DIR = Path(os.environ.get("PZ_RAIL_DATA_DIR", './archive'))
+TEST_DATA_DIR = Path('data/test/')
+MODEL_DIR = Path('projects/sandbox/data')
+ESTIMATES_DIR = Path('projects/sandbox/data')
 
 ALGOS = {
     'knn':'rail.estimation.algos.k_nearneigh.KNearNeighEstimator',
@@ -30,6 +30,11 @@ ALGOS = {
 
 def download_data():
 
+    try:
+        os.makedirs(BASE_DIR)
+    except Exception:
+        pass
+
     tar_file = 'sandbox.tgz'
     if not os.path.exists(tar_file):
         urllib.request.urlretrieve(
@@ -39,8 +44,8 @@ def download_data():
         if not os.path.exists(tar_file):
             return 1
 
-    print(f"look for {str(MODEL_DIR/ 'flagship_gold_roman_1yr' / 'model_inform_knn.pkl')}")
-    if not os.path.exists(MODEL_DIR/ 'flagship_gold_roman_1yr' / 'model_inform_knn.pkl'):
+    print(f"look for {str(BASE_DIR / MODEL_DIR/ 'flagship_gold_roman_1yr' / 'model_inform_knn.pkl')}")
+    if not os.path.exists(BASE_DIR / MODEL_DIR/ 'flagship_gold_roman_1yr' / 'model_inform_knn.pkl'):
         print(f"unpack to {BASE_DIR}")
         status = subprocess.run(
             ["tar", "zxvf", tar_file, "-C", BASE_DIR], check=False
@@ -48,16 +53,8 @@ def download_data():
         if status.returncode != 0:
             return status.returncode
 
-    if not os.path.exists(MODEL_DIR/'flagship_gold_roman_1yr' / 'model_inform_knn.pkl'):
+    if not os.path.exists(BASE_DIR / MODEL_DIR/'flagship_gold_roman_1yr' / 'model_inform_knn.pkl'):
         return 2
-
-    try:
-        os.makedirs('archive')
-        status = subprocess.run(
-            ["ln", "-s", str(BASE_DIR / pz), "archive/pz"]
-        )
-    except:
-        pass
 
 
 def load():
