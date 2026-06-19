@@ -19,7 +19,7 @@ class TestCreateApp:
         mock_get.return_value = MagicMock()
         _app = create_app()
         pages = list(dash.page_registry.keys())
-        assert len(pages) == 16
+        assert len(pages) == 18
 
     @patch("live_rail.backend.BackendProvider.get")
     def test_expected_paths_registered(self, mock_get):

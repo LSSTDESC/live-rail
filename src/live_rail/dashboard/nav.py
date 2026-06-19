@@ -48,6 +48,8 @@ def create_sidebar() -> html.Div:
             _section_header("Catalog"),
             _nav_link("Algorithms", "/crud/algorithm"),
             _nav_link("Bands", "/crud/band"),
+            _nav_link("SEDs", "/crud/sed"),
+            _nav_link("Filter AB", "/crud/filter-ab"),
             _nav_link("Catalog Tags", "/crud/catalog-tag"),
             _nav_link("Band Associations", "/crud/catalog-band-assoc"),
             _section_header("Data"),
