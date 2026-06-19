@@ -62,6 +62,26 @@ def safe_insert_matched_dataset(name, catalog_tag_name, component_dataset_names,
         )
 
 
+def safe_load_seds(sed_dir):
+    try:
+        local_sync.funcs.load_seds(
+            sed_dir,
+        )
+    except Exception as exc:
+        print(exc)
+        pass
+
+
+def safe_load_filter_abs(filter_ab_dir):
+    try:
+        local_sync.funcs.load_filter_abs(
+            filter_ab_dir,
+        )
+    except Exception as exc:
+        print(exc)
+        pass
+
+
 def setup_db() -> int:
 
     status = subprocess.run(["pz-rail-svc-local", "init", "--reset"])
