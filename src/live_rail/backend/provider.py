@@ -140,6 +140,20 @@ class BackendProvider:
         return remote_sync.model()
 
     @property
+    def filter_ab(self) -> Any:
+        self._ensure_initialized()
+        if self.is_local:
+            return local_sync.filter_ab
+        return remote_sync.filter_ab()
+
+    @property
+    def sed(self) -> Any:
+        self._ensure_initialized()
+        if self.is_local:
+            return local_sync.sed
+        return remote_sync.sed()
+
+    @property
     def funcs(self) -> Any:
         self._ensure_initialized()
         if self.is_local:
