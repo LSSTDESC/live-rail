@@ -1,0 +1,37 @@
+Bands:
+  - Band:
+      name: DECam_g
+      a_env: 3.64
+  - Band:
+      name: DECam_r
+      a_env: 2.70
+  - Band:
+      name: DECam_i
+      a_env: 2.06
+  - Band:
+      name: DECam_z
+      a_env: 1.58
+  - Band:
+      name: DECam_y
+      a_env: 1.31
+
+
+CatalogTags:
+  - CatalogTag:
+      # This is for rubin only data in the data challenge
+      name: "des_sn"
+      mag_column_template: "des_mag_{band}"
+      mag_err_column_template: "des_mag_{band}_err"
+      filter_template: "DECam_{band}"
+      band_list: ['g', 'r', 'i', 'z', 'y']
+      bands:
+        g:
+          mag_limit: 27.8
+        r:
+          mag_limit: 27.1
+        i:
+          mag_limit: 26.7
+        z:
+          mag_limit: 25.8
+        y:
+          mag_limit: 24.6
